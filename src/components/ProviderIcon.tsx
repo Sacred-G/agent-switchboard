@@ -1,0 +1,126 @@
+import React, { useMemo } from "react";
+import {
+  getIcon,
+  hasIcon,
+  getIconMetadata,
+  getIconUrl,
+  isUrlIcon,
+} from "@/icons/extracted";
+import { cn } from "@/lib/utils";
+
+interface ProviderIconProps {
+  icon?: string;
+  name: string;
+  color?: string;
+  size?: number | string;
+  className?: string;
+  showFallback?: boolean;
+}
+
+export const ProviderIcon: React.FC<ProviderIconProps> = ({
+  icon,
+  name,
+  color,
+  size = 32,
+  className,
+  showFallback = true,
+}) => {
+  const iconSvg = useMemo(() => {
+    if (icon && !isUrlIcon(icon) && hasIcon(icon)) {
+      return getIcon(icon);
+    }
+    return "";
+  }, [icon]);
+
+  const iconUrl = useMemo(() => {
+    if (icon && isUrlIcon(icon)) {
+      return getIconUrl(icon);
+    }
+    return "";
+  }, [icon]);
+
+  const sizeStyle = useMemo(() => {
+    const sizeValue = typeof size === "number" ? `${size}px` : size;
+    return {
+      width: sizeValue,
+      height: sizeValue,
+      fontSize: sizeValue,
+      lineHeight: 1,
+    };
+  }, [size]);
+
+  const effectiveColor = useMemo(() => {
+    if (color && typeof color === "string" && color.trim() !== "") {
+      return color;
+    }
+    if (icon) {
+      const metadata = getIconMetadata(icon);
+      if (metadata?.defaultColor && metadata.defaultColor !== "currentColor") {
+        return metadata.defaultColor;
+      }
+    }
+    return undefined;
+  }, [color, icon]);
+
+  if (iconSvg) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center justify-center flex-shrink-0",
+          className,
+        )}
+        title={name}
+        style={{ ...sizeStyle, color: effectiveColor }}
+        dangerouslySetInnerHTML={{ __html: iconSvg }}
+      />
+    );
+  }
+
+  if (iconUrl) {
+    return (
+      <img
+        src={iconUrl}
+        alt={name}
+        title={name}
+        className={cn(
+          "inline-flex items-center justify-center flex-shrink-0 object-contain",
+          className,
+        )}
+        style={{ width: sizeStyle.width, height: sizeStyle.height }}
+        loading="lazy"
+      />
+    );
+  }
+
+  if (showFallback) {
+    const initials = name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+    const fallbackFontSize =
+      typeof size === "number" ? `${Math.max(size * 0.5, 12)}px` : "0.5em";
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center justify-center flex-shrink-0 rounded-lg",
+          "bg-muted text-muted-foreground font-semibold",
+          className,
+        )}
+        title={name}
+        style={sizeStyle}
+      >
+        <span
+          style={{
+            fontSize: fallbackFontSize,
+          }}
+        >
+          {initials}
+        </span>
+      </span>
+    );
+  }
+
+  return null;
+};

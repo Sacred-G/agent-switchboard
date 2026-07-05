@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Switchboard Deep Link Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .link-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .link-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .link-card h3 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .link-card .description {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .deep-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .deep-link:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1f6391 100%);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .deep-link:active {
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-box h4 {
+            color: #856404;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-box ul {
+            list-style: disc;
+            margin-left: 20px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .generator-section {
+            background: #e8f4f8;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .generator-section h2 {
+            color: #2c3e50;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #3498db;
+        }
+
+        .result-box strong {
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .result-text {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            color: #2c3e50;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            margin-right: 10px;
+        }
+
+        .btn-copy:hover {
+            background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+        }
+
+        .app-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-claude {
+            background: #e8f4f8;
+            color: #3498db;
+        }
+
+        .badge-codex {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .badge-gemini {
+            background: #fdeef4;
+            color: #e91e63;
+        }
+
+        .param-list {
+            background: #f8f9fa;
+            border-left: 3px solid #3498db;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #495057;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        }
+
+        .param-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 6px;
+            background: #3498db;
+            color: white;
+        }
+
+        .param-tag.optional {
+            background: #95a5a6;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .generator-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Agent Switchboard Deep Link Test</h1>
+            <p>Click the links below to test the deep link import functionality</p>
+        </div>
+
+        <div class="content">
+
+            <!-- Configuration File Import Examples (v3.8+) -->
+            <div class="section">
+                <h2>📦 Configuration File Import Examples <span class="version-badge">v3.8+</span></h2>
+
+                <!-- Claude configuration file import -->
+                <div class="link-card">
+                    <h3>
+                        <span class="app-badge badge-claude">Claude</span>
+                        Full JSON Configuration Import
+                    </h3>
+                    <p class="description">
+                        Import full configuration via Base64 encoded JSON configuration file, containing all four models and endpoint info.
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> resource=provider, app=claude, name<br>
+                        <span class="param-tag optional">Optional</span> <strong>config</strong> (Base64 JSON),
+                        <strong>configFormat=json</strong>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=provider&app=claude&name=Claude%20Complete&configFormat=json&config=eyJlbnYiOnsiQU5USFJPUElDX0FVVEhfVE9LRU4iOiJzay1hbnQtdGVzdC1rZXkxMjMiLCJBTlRIUk9QSUNfQkFTRV9VUkwiOiJodHRwczovL2FwaS5hbnRocm9waWMuY29tL3YxIiwiQU5USFJPUElDX01PREVMIjoiY2xhdWRlLXNvbm5ldC00LjUiLCJBTlRIUk9QSUNfREVGQVVMVF9IQUlLVV9NT0RFTCI6ImNsYXVkZS1oYWlrdS00LjEiLCJBTlRIUk9QSUNfREVGQVVMVF9TT05ORVRfTU9ERUwiOiJjbGF1ZGUtc29ubmV0LTQuNSIsIkFOVEhST1BJQ19ERUZBVUxUX09QVVNfTU9ERUwiOiJjbGF1ZGUtb3B1cy00In19"
+                            class="deep-link">
+                            📥 Import Full Configuration
+                        </a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=provider&app=claude&name=Claude%20Complete&configFormat=json&config=eyJlbnYiOnsiQU5USFJPUElDX0FVVEhfVE9LRU4iOiJzay1hbnQtdGVzdC1rZXkxMjMiLCJBTlRIUk9QSUNfQkFTRV9VUkwiOiJodHRwczovL2FwaS5hbnRocm9waWMuY29tL3YxIiwiQU5USFJPUElDX01PREVMIjoiY2xhdWRlLXNvbm5ldC00LjUiLCJBTlRIUk9QSUNfREVGQVVMVF9IQUlLVV9NT0RFTCI6ImNsYXVkZS1oYWlrdS00LjEiLCJBTlRIUk9QSUNfREVGQVVMVF9TT05ORVRfTU9ERUwiOiJjbGF1ZGUtc29ubmV0LTQuNSIsIkFOVEhST1BJQ19ERUZBVUxUX09QVVNfTU9ERUwiOiJjbGF1ZGUtb3B1cy00In19', this)">
+                            📋 Copy Link
+                        </button>
+                    </div>
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">// Decoded configuration content:</div>
+                        {<br>
+                        &nbsp;&nbsp;"env": {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_AUTH_TOKEN": "sk-ant-test-key123",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_BASE_URL": "https://api.anthropic.com/v1",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_MODEL": "claude-sonnet-4.5",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4.1",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4.5",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4"<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                </div>
+
+                <!-- URL Parameter Override -->
+                <div class="link-card">
+                    <h3>
+                        <span class="app-badge badge-claude">Claude</span>
+                        Configuration + URL Parameter Override
+                    </h3>
+                    <p class="description">
+                        Configuration file provides basic settings, URL parameters override API Key. URL parameters have the highest priority.
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> name, config<br>
+                        <span class="param-tag optional">Override</span> <strong>apiKey</strong> (Override values in config file)
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=provider&app=claude&name=My%20Custom&apiKey=sk-ant-my-new-key&configFormat=json&config=eyJlbnYiOnsiQU5USFJPUElDX0JBU0VfVVJMIjoiaHR0cHM6Ly9hcGkuYW50aHJvcGljLmNvbS92MSIsIkFOVEhST1BJQ19NT0RFTCI6ImNsYXVkZS1zb25uZXQtNC41In19"
+                            class="deep-link">
+                            📥 Import Mixed Configuration
+                        </a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=provider&app=claude&name=My%20Custom&apiKey=sk-ant-my-new-key&configFormat=json&config=eyJlbnYiOnsiQU5USFJPUElDX0JBU0VfVVJMIjoiaHR0cHM6Ly9hcGkuYW50aHJvcGljLmNvbS92MSIsIkFOVEhST1BJQ19NT0RFTCI6ImNsYXVkZS1zb25uZXQtNC41In19', this)">
+                            📋 Copy Link
+                        </button>
+                    </div>
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">// Decoded configuration content:</div>
+                        {<br>
+                        &nbsp;&nbsp;"env": {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_BASE_URL": "https://api.anthropic.com/v1",<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_MODEL": "claude-sonnet-4.5"<br>
+                        &nbsp;&nbsp;}<br>
+                        }<br>
+                        <div style="color: #f39c12; margin-top: 8px;">// URL parameter override: apiKey=sk-ant-my-new-key</div>
+                    </div>
+                    <div
+                        style="margin-top: 12px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; font-size: 13px;">
+                        <strong>Priority Rules:</strong> URL parameter (apiKey) > Configuration file (endpoint, model)
+                    </div>
+                </div>
+
+                <!-- Codex TOML configuration import -->
+                <div class="link-card">
+                    <h3>
+                        <span class="app-badge badge-codex">Codex</span>
+                        TOML Configuration Import
+                    </h3>
+                    <p class="description">
+                        Codex uses TOML format configuration file, containing auth and config sections.
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> name, config<br>
+                        <span class="param-tag optional">Optional</span> <strong>configFormat=json</strong> (Codex configured asJSON
+                        packagedTOML)
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=provider&app=codex&name=OpenAI%20Complete&configFormat=json&config=eyJhdXRoIjp7Ik9QRU5BSV9BUElfS0VZIjoic2stcHJvai10ZXN0LWtleTEyMyJ9LCJjb25maWciOiJbbW9kZWxfcHJvdmlkZXJzLm9wZW5haV1cbmJhc2VfdXJsID0gXCJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxXCJcblxuW2dlbmVyYWxdXG5tb2RlbCA9IFwiZ3B0LTUuMVwiIn0="
+                            class="deep-link">
+                            📥 Import Codex Configuration
+                        </a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=provider&app=codex&name=OpenAI%20Complete&configFormat=json&config=eyJhdXRoIjp7Ik9QRU5BSV9BUElfS0VZIjoic2stcHJvai10ZXN0LWtleTEyMyJ9LCJjb25maWciOiJbbW9kZWxfcHJvdmlkZXJzLm9wZW5haV1cbmJhc2VfdXJsID0gXCJodHRwczovL2FwaS5vcGVuYWkuY29tL3YxXCJcblxuW2dlbmVyYWxdXG5tb2RlbCA9IFwiZ3B0LTUuMVwiIn0=', this)">
+                            📋 Copy Link
+                        </button>
+                    </div>
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">// Decoded configuration content:</div>
+                        {<br>
+                        &nbsp;&nbsp;"auth": {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;"OPENAI_API_KEY": "sk-proj-test-key123"<br>
+                        &nbsp;&nbsp;},<br>
+                        &nbsp;&nbsp;"config": "[model_providers.openai]\nbase_url =
+                        \"https://api.openai.com/v1\"\n\n[general]\nmodel = \"gpt-5.1\""<br>
+                        }
+                        <div style="color: #95a5a6; margin-top: 12px; margin-bottom: 4px;">// config field parsing (TOML):</div>
+                        <div style="color: #a8d08d;">[model_providers.openai]</div>
+                        <div style="color: #a8d08d;">base_url = "https://api.openai.com/v1"</div>
+                        <div style="color: #a8d08d; margin-top: 8px;">[general]</div>
+                        <div style="color: #a8d08d;">model = "gpt-5.1"</div>
+                    </div>
+                </div>
+
+                <!-- Gemini Configuration Import -->
+                <div class="link-card">
+                    <h3>
+                        <span class="app-badge badge-gemini">Gemini</span>
+                        Gemini Configuration Import
+                    </h3>
+                    <p class="description">
+                        Gemini uses a flat environment variables format, clean and simple.
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> name, config<br>
+                        <span class="param-tag optional">Optional</span> <strong>configFormat=json</strong>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=provider&app=gemini&name=Google%20Gemini&configFormat=json&config=eyJHRU1JTklfQVBJX0tFWSI6IkFJemFTeUR0ZXN0a2V5MTIzIiwiR0VNSU5JX0JBU0VfVVJMIjoiaHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhIiwiR0VNSU5JX01PREVMIjoiZ2VtaW5pLTMtcHJvLXByZXZpZXcifQ=="
+                            class="deep-link">
+                            📥 Import Gemini Configuration
+                        </a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=provider&app=gemini&name=Google%20Gemini&configFormat=json&config=eyJHRU1JTklfQVBJX0tFWSI6IkFJemFTeUR0ZXN0a2V5MTIzIiwiR0VNSU5JX0JBU0VfVVJMIjoiaHR0cHM6Ly9nZW5lcmF0aXZlbGFuZ3VhZ2UuZ29vZ2xlYXBpcy5jb20vdjFiZXRhIiwiR0VNSU5JX01PREVMIjoiZ2VtaW5pLTMtcHJvLXByZXZpZXcifQ==', this)">
+                            📋 Copy Link
+                        </button>
+                    </div>
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">// Decoded configuration content:</div>
+                        {<br>
+                        &nbsp;&nbsp;"GEMINI_API_KEY": "AIzaSyDtestkey123",<br>
+                        &nbsp;&nbsp;"GEMINI_BASE_URL": "https://generativelanguage.googleapis.com/v1beta",<br>
+                        &nbsp;&nbsp;"GEMINI_MODEL": "gemini-3-pro-preview"<br>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Comment -->
+            <div class="section">
+                <h2>🔌 MCP Servers Import <span class="version-badge">v3.8+</span></h2>
+
+                <div class="link-card">
+                    <h3>📦📦 JSON Configuration Example - Batch Import Multiple MCP Servers</h3>
+                    <p class="description">
+                        Import multiple MCP servers at once (Context7 + Sequential-thinking).
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> resource=mcp, apps, config (Base64)<br>
+                        <span class="param-tag optional">Optional</span> enabled
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=mcp&apps=claude,codex&config=eyJtY3BTZXJ2ZXJzIjp7ImNvbnRleHQ3Ijp7ImNvbW1hbmQiOiJidW54IiwiYXJncyI6WyIteSIsIkB1cHN0YXNoL2NvbnRleHQ3LW1jcCIsIi0tYXBpLWtleSIsImN0eDdzay00ZGRkNGY2Ni1lNzUyLTQwMjItYjFmNi1jOGNmNjI3OWI4MGQiXSwiZW52Ijp7fX0sInNlcXVlbnRpYWwtdGhpbmtpbmciOnsiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJAbW9kZWxjb250ZXh0cHJvdG9jb2wvc2VydmVyLXNlcXVlbnRpYWwtdGhpbmtpbmciXSwiZW52Ijp7fX19fQ==&enabled=true"
+                            class="deep-link">📥 Batch Import 2 MCP Servers</a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=mcp&apps=claude,codex&config=eyJtY3BTZXJ2ZXJzIjp7ImNvbnRleHQ3Ijp7ImNvbW1hbmQiOiJidW54IiwiYXJncyI6WyIteSIsIkB1cHN0YXNoL2NvbnRleHQ3LW1jcCIsIi0tYXBpLWtleSIsImN0eDdzay00ZGRkNGY2Ni1lNzUyLTQwMjItYjFmNi1jOGNmNjI3OWI4MGQiXSwiZW52Ijp7fX0sInNlcXVlbnRpYWwtdGhpbmtpbmciOnsiY29tbWFuZCI6Im5weCIsImFyZ3MiOlsiLXkiLCJAbW9kZWxjb250ZXh0cHJvdG9jb2wvc2VydmVyLXNlcXVlbnRpYWwtdGhpbmtpbmciXSwiZW52Ijp7fX19fQ==&enabled=true', this)">📋
+                            Copy</button>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">📦 Batch MCP Config JSON:</div>
+                        <pre style="margin: 0; color: #a8d08d; line-height: 1.6;">{
+  "mcpServers": {
+    "context7": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "ctx7sk-4ddd4f66-e752-4022-b1f6-c8cf6279b80d"
+      ],
+      "env": {}
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {}
+    }
+  }
+}</pre>
+                        <div style="color: #95a5a6; margin-top: 8px; padding-top: 8px; border-top: 1px solid #34495e;">
+                            💡 <strong>Batch importDescription</strong>: Import 2 at once MCP Server<br>
+                            📦 <strong>Server 1</strong>: context7 - Upstash Context7 MCP Server<br>
+                            📦 <strong>Server 2</strong>: sequential-thinking - Structured thinking reasoning server<br>
+                            🎯 <strong>Target Application</strong>: Claude andCodex<br>
+                            🔄 <strong>Smart Merge</strong>: If the server already exists, only update the application enabled status, notOverrideConfiguration
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt import example -->
+            <div class="section">
+                <h2>💬 Prompt Import <span class="version-badge">v3.8+</span></h2>
+
+                <div class="link-card">
+                    <h3><span class="app-badge badge-claude">Claude</span> Code Review Expert</h3>
+                    <p class="description">Import code review prompt for Claude.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=prompt&app=claude&name=Code Review Expert&content=IyDku6PnoIHlrqHmn6XkuJPlrrYKCuS9oOaYr+S4gOS9jeaciee7j+mqjOeahOS7o+eggeWuoeafpeWRmO+8jOivt+WcqOS7o+eggeWuoeafpeWbnuWkjeeahOaXtuWAmeWBmuWQr+S4i+OAgg==&description=Focus on code quality&enabled=true"
+                            class="deep-link">📥 import</a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=prompt&app=claude&name=Code Review Expert&content=IyDku6PnoIHlrqHmn6XkuJPlrrYKCuS9oOaYr+S4gOS9jeaciee7j+mqjOeahOS7o+eggeWuoeafpeWRmO+8jOivt+WcqOS7o+eggeWuoeafpeWbnuWkjeeahOaXtuWAmeWBmuWQr+S4i+OAgg==&description=Focus on code quality&enabled=true', this)">📋
+                            Copy</button>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">📝 Prompt content:</div>
+                        <div style="color: #a8d08d; white-space: pre-wrap; line-height: 1.6;"># Code Review Expert
+
+                            You are an experienced code reviewer, please provide input when responding to code reviews. </div>
+                        <div style="color: #95a5a6; margin-top: 12px; padding-top: 8px; border-top: 1px solid #34495e;">
+                            • <strong>Application</strong>: Claude<br>
+                            • <strong>Description</strong>: Focus on code quality<br>
+                            • <strong>Status</strong>: Enable immediately after importing
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="section">
+                <h2>🛠️ Skill repository import <span class="version-badge">v3.8+</span></h2>
+
+                <div class="link-card">
+                    <h3>Add Claude Skill Repository</h3>
+                    <p class="description">
+                        Import Claude Skills from GitHub repository, supporting custom branch and subdirectory paths.
+                    </p>
+                    <div class="param-list">
+                        <span class="param-tag">Required</span> resource=skill, repo (owner/name)<br>
+                        <span class="param-tag optional">Optional</span> branch, skills_path, directory
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="agent-switchboard://v1/import?resource=skill&repo=example/claude-skills&branch=main&skills_path=skills&directory=my-skills"
+                            class="deep-link">
+                            📥 importSkill RepositoryExample
+                        </a>
+                        <button class="deep-link"
+                            style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); cursor: pointer; border: none;"
+                            onclick="copyDeepLink('agent-switchboard://v1/import?resource=skill&repo=example/claude-skills&branch=main&skills_path=skills&directory=my-skills', this)">
+                            📋 Copy Link
+                        </button>
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="code-block"
+                        style="margin-top: 12px; padding: 12px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto;">
+                        <div style="color: #95a5a6; margin-bottom: 8px;">🗂️ The following Skill repository will be added:</div>
+                        <div style="color: #52c41a; margin-bottom: 4px;">• <strong>GitHub Repository</strong>:
+                            example/claude-skills</div>
+                        <div style="color: #a8d08d; margin-bottom: 4px;">• <strong>Branch</strong>: main (defaultBranch)</div>
+                        <div style="color: #a8d08d; margin-bottom: 4px;">• <strong>Skills Path</strong>: skills
+                            (The subdirectory where the skill files in the warehouse are located)</div>
+                        <div style="color: #a8d08d; margin-bottom: 4px;">• <strong>Local Directory</strong>: my-skills (Local directory name after cloning)
+                        </div>
+                        <div style="color: #95a5a6; margin-top: 12px; padding-top: 8px; border-top: 1px solid #34495e;">
+                            💡 <strong>Description</strong>: This action adds the repository to the Skill list. After adding, you can select and install specific skill files in the Skills management interface.<br>
+                            🔧 <strong>Application</strong>: Claude (Skills feature only supports Claude)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Link Generator -->
+            <div class="section">
+                <h2>🚀 Deep Link Generator</h2>
+                <p style="color: #7f8c8d; margin-bottom: 24px;">
+                    Fill in parameters to automatically generate deep link and import into Agent Switchboard
+                </p>
+                <!-- Comment -->
+                <div class="generator-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 16px;">🔌 MCP Servers Import Generator</h3>
+
+                    <div class="form-group">
+                        <label>Target App *</label>
+                        <input type="text" id="mcpApps" placeholder="e.g. claude,codex,gemini or claude" />
+                        <small style="color: #7f8c8d;">Multiple apps separated by commas</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>MCP Config (JSON) *</label>
+                        <textarea id="mcpConfig" rows="8" placeholder='{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-xxx"],
+      "type": "stdio"
+    }
+  }
+}'></textarea>
+                        <small style="color: #7f8c8d;">Complete MCP configuration JSON</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Enabled</label>
+                        <select id="mcpEnabled">
+                            <option value="true">Yes (enabled=true)</option>
+                            <option value="false">No (enabled=false)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="generateMcpLink()">🎯 Generate MCP Deep Link</button>
+
+                    <div id="mcpResult" class="result-section" style="display: none;">
+                        <label>Generated Deep Link:</label>
+                        <div class="result-url" id="mcpUrl" onclick="selectText(this)"></div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px;">
+                            <button class="btn" onclick="copyGeneratedLink('mcpUrl')">📋 Copy Link</button>
+                            <a id="mcpImportBtn" class="btn"
+                                style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); text-decoration: none;">
+                                📥 Import Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div class="generator-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 16px;">💬 Prompt Importgenerator</h3>
+
+                    <div class="form-group">
+                        <label>Target App *</label>
+                        <select id="promptApp">
+                            <option value="claude">Claude</option>
+                            <option value="codex">Codex</option>
+                            <option value="gemini">Gemini</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prompt word name*</label>
+                        <input type="text" id="promptName" placeholder="For example: Code Review Expert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prompt word content*</label>
+                        <textarea id="promptContent" rows="6" placeholder="# role definition
+
+you are a professional..."></textarea>
+                        <small style="color: #7f8c8d;">supportMarkdown format, automaticBase64 encoding</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="promptDescription" placeholder="For example: Focus on code quality" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>After importingEnabled</label>
+                        <select id="promptEnabled">
+                            <option value="true">Yes (will disable other prompts)</option>
+                            <option value="false">No (keep disabled)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="generatePromptLink()">🎯 generatePrompt Deep link</button>
+
+                    <div id="promptResult" class="result-section" style="display: none;">
+                        <label>Generated Deep Link:</label>
+                        <div class="result-url" id="promptUrl" onclick="selectText(this)"></div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px;">
+                            <button class="btn" onclick="copyGeneratedLink('promptUrl')">📋 Copy Link</button>
+                            <a id="promptImportBtn" class="btn"
+                                style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); text-decoration: none;">
+                                📥 Import Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div class="generator-section">
+                    <h3 style="color: #2c3e50; margin-bottom: 16px;">🛠️ Skill repository importgenerator</h3>
+
+                    <div class="form-group">
+                        <label>GitHub Repository *</label>
+                        <input type="text" id="skillRepo" placeholder="For example: owner/repo-name" />
+                        <small style="color: #7f8c8d;">Format: owner/Warehouse name</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Branch</label>
+                        <input type="text" id="skillBranch" placeholder="main" value="main" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Skills Path</label>
+                        <input type="text" id="skillPath" placeholder="skills" value="skills" />
+                        <small style="color: #7f8c8d;">The subdirectory where the skill files in the warehouse are located </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Local Directoryname</label>
+                        <input type="text" id="skillDirectory" placeholder="my-skills" />
+                        <small style="color: #7f8c8d;">Local directory name after cloning（Optional）</small>
+                    </div>
+
+                    <button class="btn" onclick="generateSkillLink()">🎯 generateSkill Deep link</button>
+
+                    <div id="skillResult" class="result-section" style="display: none;">
+                        <label>Generated Deep Link:</label>
+                        <div class="result-url" id="skillUrl" onclick="selectText(this)"></div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px;">
+                            <button class="btn" onclick="copyGeneratedLink('skillUrl')">📋 Copy Link</button>
+                            <a id="skillImportBtn" class="btn"
+                                style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); text-decoration: none;">
+                                📥 Import Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="section">
+                <h2>🔐 Base64 Codec</h2>
+
+                <div class="generator-section" style="background: #f5f5f5; border: 2px solid #95a5a6;">
+                    <h3 style="color: #2c3e50; margin-bottom: 16px;">encoder (UTF-8 → Base64)</h3>
+                    <div class="form-group">
+                        <label>original content (UTF-8 text) </label>
+                        <textarea id="encodeInput" rows="6" placeholder="Enter text to encode...&#10;Support Chinese,JSON、TOML Wait for allUTF-8 character"
+                            style="font-family: monospace; font-size: 13px;"></textarea>
+                    </div>
+                    <button class="btn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);"
+                        onclick="encodeToBase64()">
+                        🔒 encoded asBase64
+                    </button>
+                    <div id="encodeResult" style="display: none;" class="result-box">
+                        <strong>✅ Encoding result: </strong>
+                        <div class="result-text" id="encodeOutput"></div>
+                        <button class="btn btn-copy" onclick="copyEncoded()">📋 CopyResult</button>
+                        <small style="color: #7f8c8d; display: block; margin-top: 8px;">
+                            💡 Can be used directly for deep linkingconfig orcontent parameters
+                        </small>
+                    </div>
+                </div>
+
+                <div class="generator-section"
+                    style="background: #f0f9ff; border: 2px solid #3498db; margin-top: 24px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 16px;">decoder (Base64 → UTF-8)</h3>
+                    <div class="form-group">
+                        <label>Base64 Encoding content</label>
+                        <textarea id="decodeInput" rows="6"
+                            placeholder="PasteBase64 encoded text...&#10;For example: eyJlbnYiOnsiaGVsbG8iOiJ3b3JsZCJ9fQ=="
+                            style="font-family: monospace; font-size: 13px;"></textarea>
+                    </div>
+                    <button class="btn" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);"
+                        onclick="decodeFromBase64()">
+                        🔓 decode to text
+                    </button>
+                    <div id="decodeResult" style="display: none;" class="result-box">
+                        <strong>✅ Decoding result: </strong>
+                        <div class="result-text" id="decodeOutput" style="white-space: pre-wrap;"></div>
+                        <button class="btn btn-copy" onclick="copyDecoded()">📋 CopyResult</button>
+                        <div id="jsonFormat" style="display: none; margin-top: 12px;">
+                            <button class="btn" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);"
+                                onclick="formatJson()">
+                                ✨ formatJSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 24px; background: #e8f4f8; border-left: 4px solid #3498db;">
+                    <h4 style="color: #2c3e50;">💡 Suggestions for use</h4>
+                    <ul style="color: #2c3e50;">
+                        <li><strong>Encoding configuration file</strong>：WillJSON orTOML The content is encoded forconfig parameters</li>
+                        <li><strong>codingPrompt</strong>：WillMarkdown Encoded prompt content used for content parameters</li>
+                        <li><strong>Verify deep link</strong>：Decode and verify if the configuration content in deep links is correct</li>
+                        <li><strong>UTF-8 Support</strong>：Fully supports Chinese and other languagesUnicode character</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="info-box">
+                <h4>⚠️ Precautions for use</h4>
+                <ul>
+                    <li><strong>First click</strong>：The browser will ask for permission to open Agent Switchboard，Please click"allow"or"Open"</li>
+                    <li><strong>macOS User</strong>：may need to be"System settings" → "Privacy and security"Apps allowed in </li>
+                    <li><strong>testAPI Key</strong>：in the exampleAPI Key For testing format only, not for actual use</li>
+                    <li><strong>Import confirmation</strong>：After clicking the link, a confirmation dialog box will pop up.API Key will be masked (first 4 characters)+****）</li>
+                    <li><strong>Edit configuration</strong>：After importing, you canAgent Switchboard Edit or delete config anytime</li>
+                </ul>
+            </div>
+
+            <!-- Comment -->
+            <div class="generator-section" style="background: #f0f9ff; border: 2px solid #3498db;">
+                <h2>🔍 Deep link resolver</h2>
+                <p style="color: #7f8c8d; margin-bottom: 24px;">Paste deep linkURL，View analysis results</p>
+
+                <div class="form-group">
+                    <label>deep linkURL</label>
+                    <textarea id="parseUrl" rows="3" placeholder="Paste the completeagent-switchboard:// deep link..."
+                        style="font-family: monospace; font-size: 13px;"></textarea>
+                </div>
+
+                <button class="btn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);"
+                    onclick="parseDeepLink()">
+                    🔍 Parse deep links
+                </button>
+
+                <!-- Comment -->
+                <div id="parseResult" style="display: none;">
+                    <div class="result-box" style="margin-top: 20px;">
+                        <strong>✅ Analysis result: </strong>
+
+                        <!-- Comment -->
+                        <div id="parseBasicInfo" style="margin-top: 16px;"></div>
+
+                        <!-- Comment -->
+                        <div id="parseUrlParams" style="margin-top: 16px;"></div>
+
+                        <!-- Comment -->
+                        <div id="parseConfigContent" style="margin-top: 16px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Link Generator -->
+            <div class="generator-section">
+                <h2>🛠️ Deep Link Generator</h2>
+                <p style="color: #7f8c8d; margin-bottom: 24px;">Fill in the form below to generate your own deep links</p>
+
+                <!-- Comment -->
+                <div class="form-group">
+                    <label>import mode</label>
+                    <select id="importMode" onchange="toggleImportMode()">
+                        <option value="url">URL Parameter Mode (Legacy) </option>
+                        <option value="config">Profile Mode (v3.8+）</option>
+                    </select>
+                    <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                        URL Parameter mode: directly inURL Pass parameters in| Profile mode: useBase64 codedJSON/TOML
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Application type*</label>
+                    <select id="app" onchange="updateModelFields()">
+                        <option value="claude">Claude Code</option>
+                        <option value="codex">Codex</option>
+                        <option value="gemini">Gemini</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Supplier name*</label>
+                    <input type="text" id="name" placeholder="For example: Claude Official">
+                    <small style="color: #e74c3c; font-size: 12px; display: block; margin-top: 4px;">
+                        ⚠️ Only required field
+                    </small>
+                </div>
+
+                <!-- Comment -->
+                <div id="urlModeFields">
+                    <div class="form-group">
+                        <label>Official website address</label>
+                        <input type="url" id="homepage" placeholder="https://example.com（Optional，Config file mode can auto-infer）">
+                    </div>
+
+                    <div class="form-group">
+                        <label>API endpoint</label>
+                        <input type="url" id="endpoint" placeholder="https://api.example.com/v1（Config file mode can extract from config）">
+                        <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                            hostAPI endpoint address
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>spareAPI endpoint(Optional，comma separated)</label>
+                        <input type="text" id="extraEndpoints" placeholder="https://api2.example.com/v1, https://api3.example.com/v1">
+                        <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                            Multiple alternate endpoints are separated by commas and automatically added asCustomendpoint
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" id="apiKey" placeholder="sk-xxxxx orAIzaSyXXXXX（Config file mode can extract from config）">
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div id="configModeFields" style="display: none;">
+                    <!-- Comment -->
+                    <div id="generalConfigGroup" class="form-group">
+                        <label id="configJsonLabel">Configuration file content (JSON）</label>
+                        <textarea id="configJson" rows="12"
+                            placeholder='enterJSON Configuration, for example:&#10;{&#10;  "env": {&#10;    "ANTHROPIC_AUTH_TOKEN": "sk-ant-xxx",&#10;    "ANTHROPIC_BASE_URL": "https://api.anthropic.com/v1",&#10;    "ANTHROPIC_MODEL": "claude-sonnet-4.5"&#10;  }&#10;}'></textarea>
+                        <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                            The configuration file will be automaticallyBase64 encoding
+                        </small>
+                    </div>
+
+                    <!-- Comment -->
+                    <div id="codexConfigGroup" style="display: none;">
+                        <div class="form-group">
+                            <label>Codex Certification information (JSON)</label>
+                            <textarea id="codexAuthJson" rows="5"
+                                placeholder='{&#10;  "auth": {&#10;    "OPENAI_API_KEY": "sk-..."&#10;  }&#10;}'></textarea>
+                            <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                                IncludeAPI Key certification informationJSON object
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label>Codex configuration file (TOML)</label>
+                            <textarea id="codexConfigToml" rows="10"
+                                placeholder='[model_providers.openai]&#10;base_url = "..."&#10;&#10;[general]&#10;model = "..."'
+                                style="font-family: monospace;"></textarea>
+                            <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                                config.toml original content of
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>URL parameterOverride（Optional）</label>
+                        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                            <p style="font-size: 12px; color: #856404; margin: 0;">
+                                💡 You can fill it in belowAPI Key、Endpoint and other parameters comeOverride values in config file。Leave blank to use the configuration file entirely.
+                            </p>
+                        </div>
+                        <input type="text" id="overrideApiKey" placeholder="Overridein the configuration fileAPI Key（Optional）">
+                        <input type="url" id="overrideEndpoint" placeholder="Overrideendpoint in the configuration file (Optional）" style="margin-top: 8px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Default model (Optional）</label>
+                    <input type="text" id="model" placeholder="For example: claude-haiku-4.1, gpt-5.1, gemini-3-pro-preview">
+                    <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                        Universal model fields, applicable to all app types
+                    </small>
+                </div>
+
+                <!-- Comment -->
+                <div id="claudeFields" style="display: block;">
+                    <div style="background: #e8f4f8; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                        <h4 style="color: #2c3e50; margin-bottom: 12px; font-size: 14px;">
+                            📋 Claude Private model fields (Optional）
+                        </h4>
+                        <p style="color: #7f8c8d; font-size: 12px; margin-bottom: 12px;">
+                            Specific model fields can be set as needed, these fields are only available inClaude Effective in application
+                        </p>
+
+                        <div class="form-group">
+                            <label>Haiku Model</label>
+                            <input type="text" id="haikuModel" placeholder="claude-haiku-4.1">
+                            <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                                Corresponding environment variables:ANTHROPIC_DEFAULT_HAIKU_MODEL
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sonnet Model</label>
+                            <input type="text" id="sonnetModel" placeholder="claude-sonnet-4.5">
+                            <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                                Corresponding environment variables:ANTHROPIC_DEFAULT_SONNET_MODEL
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Opus Model</label>
+                            <input type="text" id="opusModel" placeholder="claude-opus-4">
+                            <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                                Corresponding environment variables:ANTHROPIC_DEFAULT_OPUS_MODEL
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>icon(Optional）</label>
+                    <input type="text" id="icon" placeholder="For example: openai, anthropic, google">
+                    <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 4px;">
+                        Icon name, used for display in the interface
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Set as current provider after import?</label>
+                    <select id="enabled">
+                        <option value="true">Yes (switch to this provider immediately))</option>
+                        <option value="false">No (add only, do not switch))</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Remark(Optional）</label>
+                    <textarea id="notes" rows="2" placeholder="For example: Company dedicated account"></textarea>
+                </div>
+
+                <!-- Comment -->
+                <div style="background: #f0fff4; padding: 16px; border-radius: 8px; margin: 16px 0; border: 2px solid #27ae60;">
+                    <h4 style="color: #27ae60; margin-bottom: 12px; font-size: 14px;">
+                        📊 Usage query configuration (v3.9+，Optional）
+                    </h4>
+                    <p style="color: #7f8c8d; font-size: 12px; margin-bottom: 12px;">
+                        Configure Usage QueryScript, can automatically queryAPI balance
+                    </p>
+
+                    <div class="form-group">
+                        <label>Enable usage query</label>
+                        <select id="usageEnabled">
+                            <option value="">Not configured</option>
+                            <option value="true">enable</option>
+                            <option value="false">Disable</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Usage queryBase URL</label>
+                        <input type="url" id="usageBaseUrl" placeholder="https://example.com（Base URL used for usage query URL）">
+                        <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                            The base address of the usage query interface must match the request in the script.URL Homology
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Special for usage queryAPI Key（Optional）</label>
+                        <input type="text" id="usageApiKey" placeholder="Leave empty to use provider's API Key">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Usage query script</label>
+                        <textarea id="usageScript" rows="12" style="font-family: monospace; font-size: 12px;"
+                            placeholder='({
+  request: {
+    url: "{{baseUrl}}/api/v1/user/subscription-info",
+    method: "GET",
+    headers: { "Authorization": "{{apiKey}}" }
+  },
+  extractor: function(response) {
+    const data = typeof response === "string" ? JSON.parse(response) : response;
+    return {
+      isValid: true,
+      remaining: data.balance ?? 0,
+      unit: "USD"
+    };
+  }
+})'></textarea>
+                        <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                            Support template variables:{{baseUrl}}、{{apiKey}}、{{accessToken}}、{{userId}}
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Auto-query interval (minutes)）</label>
+                        <input type="number" id="usageAutoInterval" placeholder="30" min="0">
+                        <small style="color: #7f8c8d; font-size: 11px; display: block; margin-top: 4px;">
+                            0 Indicates disabling automatic query
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Access Token（Optional）</label>
+                        <input type="text" id="usageAccessToken" placeholder="someAPI Required access token">
+                    </div>
+
+                    <div class="form-group">
+                        <label>User ID（Optional）</label>
+                        <input type="text" id="usageUserId" placeholder="someAPI Users who needID">
+                    </div>
+                </div>
+
+                <button class="btn" onclick="generateLink()">🚀 Generate deep link</button>
+
+                <div id="result" style="display: none;">
+                    <div class="result-box">
+                        <strong>✅ Generated Deep Link:</strong>
+                        <div class="result-text" id="linkText"></div>
+                        <button class="btn btn-copy" onclick="copyLink()">📋 Copy Link</button>
+                        <a id="testLink" class="deep-link" style="text-decoration: none;">
+                            🧪 test link
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UTF-8 String conversionBase64
+        function utf8_to_b64(str) {
+            try {
+                const bytes = new TextEncoder().encode(str);
+                const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+                return btoa(binString);
+            } catch (e) {
+                console.error("Base64 encode error:", e);
+                return window.btoa(unescape(encodeURIComponent(str)));
+            }
+        }
+
+        // Base64 changeUTF-8 stringfunction b64_to_utf8(str) {
+            try {
+                const binString = atob(str);
+                const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+                return new TextDecoder().decode(bytes);
+            } catch (e) {
+                console.error("Base64 decode error:", e);
+                return decodeURIComponent(escape(window.atob(str)));
+            }
+        }
+
+        // Switch import modefunction toggleImportMode() {
+            const mode = document.getElementById('importMode').value;
+            const urlFields = document.getElementById('urlModeFields');
+            const configFields = document.getElementById('configModeFields');
+
+            if (mode === 'url') {
+                urlFields.style.display = 'block';
+                configFields.style.display = 'none';
+            } else {
+                urlFields.style.display = 'none';
+                configFields.style.display = 'block';
+                // Automatically populate sample configuration when switching to profile modepopulateConfigTemplate();
+            }
+        }
+
+        // ... (rest of the functions) ...
+
+        // Fill config template based on app type
+        function populateConfigTemplate() {
+            const app = document.getElementById('app').value;
+            const configTextarea = document.getElementById('configJson');
+            const codexAuthTextarea = document.getElementById('codexAuthJson');
+            const codexConfigTextarea = document.getElementById('codexConfigToml');
+
+            let template = '';
+
+            if (app === 'claude') {
+                template = `{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-ant-your-api-key-here",
+    "ANTHROPIC_BASE_URL": "https://api.anthropic.com/v1",
+    "ANTHROPIC_MODEL": "claude-sonnet-4.5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4.1",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4.5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4"
+  }
+}`;
+                configTextarea.value = template;
+            } else if (app === 'codex') {
+                // Codex fill separatelycodexAuthTextarea.value = `{
+  "auth": {
+    "OPENAI_API_KEY": "sk-proj-your-api-key-here"
+  }
+}`;
+                codexConfigTextarea.value = `model_provider = "custom"
+model = "gpt-5.1"
+model_reasoning_effort = "high"
+disable_response_storage = true
+
+[model_providers.custom]
+name = "custom"
+base_url = "https://api.openai.com/v1"
+wire_api = "responses"
+requires_openai_auth = true`;
+            } else if (app === 'gemini') {
+                template = `{
+  "GEMINI_API_KEY": "AIzaSy-your-api-key-here",
+  "GEMINI_BASE_URL": "https://generativelanguage.googleapis.com/v1beta",
+  "GEMINI_MODEL": "gemini-3-pro-preview"
+}`;
+                configTextarea.value = template;
+            }
+        }
+
+        // Update model field displayfunction updateModelFields() {
+            const app = document.getElementById('app').value;
+            const claudeFields = document.getElementById('claudeFields');
+            const generalConfigGroup = document.getElementById('generalConfigGroup');
+            const codexConfigGroup = document.getElementById('codexConfigGroup');
+            const mode = document.getElementById('importMode').value;
+
+            // Claude Field display controlif (app === 'claude') {
+                claudeFields.style.display = 'block';
+            } else {
+                claudeFields.style.display = 'none';
+            }
+
+            // Config file input box control
+            if (mode === 'config') {
+                if (app === 'codex') {
+                    generalConfigGroup.style.display = 'none';
+                    codexConfigGroup.style.display = 'block';
+                } else {
+                    generalConfigGroup.style.display = 'block';
+                    codexConfigGroup.style.display = 'none';
+                }
+                populateConfigTemplate();
+            }
+        }
+
+        function generateLink() {
+            const mode = document.getElementById('importMode').value;
+            const app = document.getElementById('app').value;
+            const name = document.getElementById('name').value.trim();
+
+            // Validate required fields（Only name is required)if (!name) {
+                alert('❌ Please fill in the supplier name!');
+                return;
+            }
+
+            // Build basic parametersconst params = new URLSearchParams({
+                resource: 'provider',
+                app: app,
+                name: name
+            });
+
+            if (mode === 'url') {
+                // URL Parameter modeconst homepage = document.getElementById('homepage').value.trim();
+                const endpoint = document.getElementById('endpoint').value.trim();
+                const apiKey = document.getElementById('apiKey').value.trim();
+                const model = document.getElementById('model').value.trim();
+                const icon = document.getElementById('icon').value.trim();
+                const enabled = document.getElementById('enabled').value;
+                const notes = document.getElementById('notes').value.trim();
+
+                // Claude Private fieldsconst haikuModel = document.getElementById('haikuModel').value.trim();
+                const sonnetModel = document.getElementById('sonnetModel').value.trim();
+                const opusModel = document.getElementById('opusModel').value.trim();
+
+                // URL mode, at leastendpoint andapiKey
+                if (!endpoint || !apiKey) {
+                    alert('❌ URL In parameter mode, endpoint and API Key It is required!');
+                    return;
+                }
+
+                // verifyURL Formatif (homepage) {
+                    try {
+                        new URL(homepage);
+                    } catch (e) {
+                        alert('❌ Please enter a valid official websiteURL Format (need to includehttp:// orhttps://）！');
+                        return;
+                    }
+                }
+
+                try {
+                    new URL(endpoint);
+                } catch (e) {
+                    alert('❌ Please enter a valid endpointURL Format (need to includehttp:// orhttps://）！');
+                    return;
+                }
+
+                // Add parametersif (homepage) params.append('homepage', homepage);
+
+                // Merge main endpoint and backup endpoints
+                const extraEndpoints = document.getElementById('extraEndpoints').value.trim();
+                let fullEndpoint = endpoint;
+                if (extraEndpoints) {
+                    const extras = extraEndpoints.split(',').map(e => e.trim()).filter(e => e);
+                    if (extras.length > 0) {
+                        fullEndpoint = endpoint + ',' + extras.join(',');
+                    }
+                }
+                params.append('endpoint', fullEndpoint);
+
+                params.append('apiKey', apiKey);
+                if (model) params.append('model', model);
+                if (icon) params.append('icon', icon);
+                if (enabled) params.append('enabled', enabled);
+                if (notes) params.append('notes', notes);
+
+                // Add toClaude Private model fieldsif (app === 'claude') {
+                    if (haikuModel) params.append('haikuModel', haikuModel);
+                    if (sonnetModel) params.append('sonnetModel', sonnetModel);
+                    if (opusModel) params.append('opusModel', opusModel);
+                }
+            } else {
+                // Profile modelet configJson = '';
+
+                if (app === 'codex') {
+                    // Codex Special handling: mergeAuth JSON andConfig TOML
+                    const authJson = document.getElementById('codexAuthJson').value.trim();
+                    const configToml = document.getElementById('codexConfigToml').value.trim();
+
+                    if (!authJson) {
+                        alert('❌ Please fill inCodex Certification information (JSON)！');
+                        return;
+                    }
+                    if (!configToml) {
+                        alert('❌ Please fill inCodex configuration file (TOML)！');
+                        return;
+                    }
+
+                    try {
+                        const authObj = JSON.parse(authJson);
+                        // Construct the final objectconst finalObj = {
+                            ...authObj,
+                            config: configToml
+                        };
+                        configJson = JSON.stringify(finalObj);
+                    } catch (e) {
+                        alert('❌ Codex Authentication information is not validJSON Format:' + e.message);
+                        return;
+                    }
+                } else {
+                    // Common to other applicationsJSON Input boxconfigJson = document.getElementById('configJson').value.trim();
+                    if (!configJson) {
+                        alert('❌ In configuration file mode, please fill in config file content！');
+                        return;
+                    }
+                    // verifyJSON Formattry {
+                        JSON.parse(configJson);
+                    } catch (e) {
+                        alert('❌ Configuration file is not validJSON Format:' + e.message);
+                        return;
+                    }
+                }
+
+                const overrideApiKey = document.getElementById('overrideApiKey').value.trim();
+                const overrideEndpoint = document.getElementById('overrideEndpoint').value.trim();
+                const model = document.getElementById('model').value.trim();
+                const icon = document.getElementById('icon').value.trim();
+                const enabled = document.getElementById('enabled').value;
+                const notes = document.getElementById('notes').value.trim();
+
+                // Claude Private fieldsconst haikuModel = document.getElementById('haikuModel').value.trim();
+                const sonnetModel = document.getElementById('sonnetModel').value.trim();
+                const opusModel = document.getElementById('opusModel').value.trim();
+
+                // Base64 encoding profileconst configB64 = utf8_to_b64(configJson);
+                params.append('config', configB64);
+                params.append('configFormat', 'json');
+
+                // Add toOverrideparameterif (overrideApiKey) params.append('apiKey', overrideApiKey);
+                if (overrideEndpoint) {
+                    try {
+                        new URL(overrideEndpoint);
+                        params.append('endpoint', overrideEndpoint);
+                    } catch (e) {
+                        alert('❌ OverrideendpointURL Invalid format!');
+                        return;
+                    }
+                }
+
+                if (model) params.append('model', model);
+                if (icon) params.append('icon', icon);
+                if (enabled) params.append('enabled', enabled);
+                if (notes) params.append('notes', notes);
+
+                // Add toClaude Private model fieldsif (app === 'claude') {
+                    if (haikuModel) params.append('haikuModel', haikuModel);
+                    if (sonnetModel) params.append('sonnetModel', sonnetModel);
+                    if (opusModel) params.append('opusModel', opusModel);
+                }
+            }
+
+            // Add usage query parameters (v3.9+)
+            const usageEnabled = document.getElementById('usageEnabled').value;
+            const usageBaseUrl = document.getElementById('usageBaseUrl').value.trim();
+            const usageApiKey = document.getElementById('usageApiKey').value.trim();
+            const usageScript = document.getElementById('usageScript').value.trim();
+            const usageAutoInterval = document.getElementById('usageAutoInterval').value.trim();
+            const usageAccessToken = document.getElementById('usageAccessToken').value.trim();
+            const usageUserId = document.getElementById('usageUserId').value.trim();
+
+            if (usageEnabled) params.append('usageEnabled', usageEnabled);
+            if (usageBaseUrl) params.append('usageBaseUrl', usageBaseUrl);
+            if (usageApiKey) params.append('usageApiKey', usageApiKey);
+            if (usageScript) {
+                // URL-safe Base64 codingconst scriptB64 = utf8_to_b64(usageScript)
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+                params.append('usageScript', scriptB64);
+            }
+            if (usageAutoInterval) params.append('usageAutoInterval', usageAutoInterval);
+            if (usageAccessToken) params.append('usageAccessToken', usageAccessToken);
+            if (usageUserId) params.append('usageUserId', usageUserId);
+
+            const deepLink = `agent-switchboard://v1/import?${params.toString()}`;
+
+            // Show resultsdocument.getElementById('linkText').textContent = deepLink;
+            document.getElementById('testLink').href = deepLink;
+            document.getElementById('result').style.display = 'block';
+
+            // Scroll to results areadocument.getElementById('result').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        function copyLink() {
+            const linkText = document.getElementById('linkText').textContent;
+
+            navigator.clipboard.writeText(linkText).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ alreadyCopy！';
+                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('CopyFailed:', err);
+                alert('❌ CopyFailed，Please manuallyCopy Link');
+            });
+        }
+
+        // Copydeep linkfunction copyDeepLink(url, button) {
+            navigator.clipboard.writeText(url).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ alreadyCopy！';
+                button.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('CopyFailed:', err);
+                alert('❌ CopyFailed，Please manuallyCopy Link');
+            });
+        }
+
+        // Deep link resolverfunction parseDeepLink() {
+            const urlInput = document.getElementById('parseUrl').value.trim();
+
+            if (!urlInput) {
+                alert('❌ Please enter deep linkURL！');
+                return;
+            }
+
+            try {
+                // parseURL
+                const url = new URL(urlInput);
+
+                // Verification protocolif (url.protocol !== 'agent-switchboard:') {
+                    alert('❌ Invalid deep link protocol! Must start with agent-switchboard:// beginning');
+                    return;
+                }
+
+                // Extract version and pathconst version = url.hostname;
+                const path = url.pathname;
+
+                // Parse query parametersconst params = new URLSearchParams(url.search);
+                const paramsObj = {};
+                params.forEach((value, key) => {
+                    paramsObj[key] = value;
+                });
+
+                // Build basic informationHTML
+                let basicInfoHtml = `
+                    <div style="background: #e8f4f8; padding: 16px; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <h4 style="margin-bottom: 12px; color: #2c3e50;">📋 Basic information</h4>
+                        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; font-size: 14px;">
+                            <div style="color: #7f8c8d;">Protocol version:</div>
+                            <div style="font-weight: 600; color: #2c3e50;">${version}</div>
+                            <div style="color: #7f8c8d;">path:</div>
+                            <div style="font-weight: 600; color: #2c3e50;">${path}</div>
+                            <div style="color: #7f8c8d;">Resource type:</div>
+                            <div style="font-weight: 600; color: #2c3e50;">${paramsObj.resource || '-'}</div>
+                            <div style="color: #7f8c8d;">Application type:</div>
+                            <div style="font-weight: 600; color: #2c3e50; text-transform: capitalize;">${paramsObj.app || '-'}</div>
+                            <div style="color: #7f8c8d;">Supplier name:</div>
+                            <div style="font-weight: 600; color: #2c3e50;">${paramsObj.name || '-'}</div>
+                        </div>
+                    </div>
+                `;
+
+                // BuildURL parameterHTML
+                let urlParamsHtml = `
+                    <div style="background: #fff3cd; padding: 16px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <h4 style="margin-bottom: 12px; color: #856404;">🔗 URL parameters</h4>
+                        <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; font-size: 13px;">
+                `;
+
+                // General parameters (excludeendpoint，processed separately)const regularParams = ['homepage', 'apiKey', 'model', 'notes'];
+                regularParams.forEach(key => {
+                    if (paramsObj[key]) {
+                        let displayValue = paramsObj[key];
+                        // API Key Mask processingif (key === 'apiKey') {
+                            displayValue = displayValue.substring(0, 10) + '****';
+                        }
+                        urlParamsHtml += `
+                            <div style="color: #856404; font-weight: 500;">${key}:</div>
+                            <div style="color: #856404; word-break: break-all; font-family: monospace; font-size: 12px;">${displayValue}</div>
+                        `;
+                    }
+                });
+
+                // Handle separatelyendpoint（Supports multiple endpoints)if (paramsObj.endpoint) {
+                    const endpoints = paramsObj.endpoint.split(',').map(e => e.trim()).filter(e => e);
+                    if (endpoints.length === 1) {
+                        // single endpointurlParamsHtml += `
+                            <div style="color: #856404; font-weight: 500;">endpoint:</div>
+                            <div style="color: #856404; word-break: break-all; font-family: monospace; font-size: 12px;">${endpoints[0]}</div>
+                        `;
+                    } else {
+                        // Multiple endpointsurlParamsHtml += `
+                            <div style="color: #856404; font-weight: 500;">endpoints:</div>
+                            <div style="color: #856404; word-break: break-all; font-family: monospace; font-size: 12px;">
+                        `;
+                        endpoints.forEach((ep, idx) => {
+                            const label = idx === 0 ? '🔹 main endpoint' : `└ spare${idx}`;
+                            urlParamsHtml += `
+                                <div style="margin-bottom: 4px; ${idx === 0 ? 'font-weight: 600;' : 'color: #a08040;'}">
+                                    ${label}: ${ep}
+                                </div>
+                            `;
+                        });
+                        urlParamsHtml += `
+                                <div style="margin-top: 8px; padding: 6px 10px; background: #fff8e1; border-radius: 4px; font-size: 11px; color: #856404;">
+                                    💡 common${endpoints.length} endpoints, the first one is the primary endpoint, and the rest are backup endpoints
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Claude Dedicated model parametersconst claudeModelParams = ['haikuModel', 'sonnetModel', 'opusModel'];
+                claudeModelParams.forEach(key => {
+                    if (paramsObj[key]) {
+                        urlParamsHtml += `
+                            <div style="color: #856404; font-weight: 500;">${key}:</div>
+                            <div style="color: #856404; word-break: break-all; font-family: monospace; font-size: 12px;">${paramsObj[key]}</div>
+                        `;
+                    }
+                });
+
+                urlParamsHtml += '</div></div>';
+
+                // Configuration file analysislet configHtml = '';
+                if (paramsObj.config) {
+                    try {
+                        // decodingBase64
+                        const decoded = b64_to_utf8(paramsObj.config);
+                        const configObj = JSON.parse(decoded);
+
+                        configHtml = `
+                            <div style="background: #d1ecf1; padding: 16px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                                <h4 style="margin-bottom: 12px; color: #0c5460;">📄 Configuration file content (${paramsObj.configFormat?.toUpperCase() || 'JSON'})</h4>
+                        `;
+
+                        // Parse config based on app type
+                        if (paramsObj.app === 'claude') {
+                            const env = configObj.env || {};
+                            configHtml += `
+                                <div style="background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                                    <div style="font-size: 12px; color: #0c5460; margin-bottom: 8px; font-weight: 600;">Claude environment variables:</div>
+                                    <div style="display: grid; grid-template-columns: 250px 1fr; gap: 6px; font-size: 12px; font-family: monospace;">
+                            `;
+                            Object.keys(env).forEach(key => {
+                                let value = env[key];
+                                if (key.includes('TOKEN') || key.includes('KEY')) {
+                                    value = value.substring(0, 10) + '****';
+                                }
+                                configHtml += `
+                                    <div style="color: #0c5460; font-weight: 500;">${key}:</div>
+                                    <div style="color: #0c5460;">${value}</div>
+                                `;
+                            });
+                            configHtml += '</div></div>';
+                        } else if (paramsObj.app === 'codex') {
+                            const auth = configObj.auth || {};
+                            const config = configObj.config || '';
+
+                            configHtml += `
+                                <div style="background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                                    <div style="font-size: 12px; color: #0c5460; margin-bottom: 8px; font-weight: 600;">Codex Certification information:</div>
+                                    <div style="display: grid; grid-template-columns: 200px 1fr; gap: 6px; font-size: 12px; font-family: monospace;">
+                            `;
+                            Object.keys(auth).forEach(key => {
+                                let value = auth[key];
+                                if (key.includes('KEY')) {
+                                    value = value.substring(0, 10) + '****';
+                                }
+                                configHtml += `
+                                    <div style="color: #0c5460; font-weight: 500;">${key}:</div>
+                                    <div style="color: #0c5460;">${value}</div>
+                                `;
+                            });
+                            configHtml += '</div></div>';
+
+                            if (config) {
+                                configHtml += `
+                                    <div style="background: #fff; padding: 12px; border-radius: 6px;">
+                                        <div style="font-size: 12px; color: #0c5460; margin-bottom: 8px; font-weight: 600;">TOML Configuration:</div>
+                                        <pre style="margin: 0; font-size: 11px; color: #0c5460; white-space: pre-wrap; word-break: break-all;">${config}</pre>
+                                    </div>
+                                `;
+                            }
+                        } else if (paramsObj.app === 'gemini') {
+                            configHtml += `
+                                <div style="background: #fff; padding: 12px; border-radius: 6px;">
+                                    <div style="font-size: 12px; color: #0c5460; margin-bottom: 8px; font-weight: 600;">Gemini environment variables:</div>
+                                    <div style="display: grid; grid-template-columns: 200px 1fr; gap: 6px; font-size: 12px; font-family: monospace;">
+                            `;
+                            Object.keys(configObj).forEach(key => {
+                                let value = configObj[key];
+                                if (key.includes('KEY')) {
+                                    value = value.substring(0, 10) + '****';
+                                }
+                                configHtml += `
+                                    <div style="color: #0c5460; font-weight: 500;">${key}:</div>
+                                    <div style="color: #0c5460;">${value}</div>
+                                `;
+                            });
+                            configHtml += '</div></div>';
+                        }
+
+                        // originalJSON
+                        configHtml += `
+                            <details style="margin-top: 12px;">
+                                <summary style="cursor: pointer; color: #0c5460; font-size: 12px; font-weight: 600;">View originalJSON →</summary>
+                                <pre style="margin-top: 8px; padding: 12px; background: #f8f9fa; border-radius: 6px; font-size: 11px; overflow-x: auto; border: 1px solid #dee2e6;">${JSON.stringify(configObj, null, 2)}</pre>
+                            </details>
+                        `;
+
+                        configHtml += '</div>';
+                    } catch (e) {
+                        configHtml = `
+                            <div style="background: #f8d7da; padding: 16px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                <h4 style="margin-bottom: 8px; color: #721c24;">❌ Configuration file analysisFailed</h4>
+                                <div style="color: #721c24; font-size: 13px;">${e.message}</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Usage query configuration parsing (v3.9+)
+                let usageHtml = '';
+                if (paramsObj.usageEnabled || paramsObj.usageScript || paramsObj.usageBaseUrl) {
+                    usageHtml = `
+                        <div style="background: #f0fff4; padding: 16px; border-radius: 8px; border-left: 4px solid #27ae60; margin-top: 16px;">
+                            <h4 style="margin-bottom: 12px; color: #27ae60;">📊 Usage query configuration (v3.9+)</h4>
+                            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px; font-size: 13px;">
+                    `;
+
+                    if (paramsObj.usageEnabled) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">Enabled status:</div>
+                            <div style="color: #27ae60;">${paramsObj.usageEnabled === 'true' ? '✅ Enabled' : '❌ Disabled'}</div>
+                        `;
+                    }
+
+                    if (paramsObj.usageBaseUrl) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">Base URL:</div>
+                            <div style="color: #27ae60; word-break: break-all; font-family: monospace; font-size: 12px;">${paramsObj.usageBaseUrl}</div>
+                        `;
+                    }
+
+                    if (paramsObj.usageApiKey) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">API Key:</div>
+                            <div style="color: #27ae60; font-family: monospace; font-size: 12px;">${paramsObj.usageApiKey.substring(0, 10)}****</div>
+                        `;
+                    }
+
+                    if (paramsObj.usageAutoInterval) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">Automatic query interval:</div>
+                            <div style="color: #27ae60;">${paramsObj.usageAutoInterval} minutes</div>
+                        `;
+                    }
+
+                    if (paramsObj.usageAccessToken) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">Access Token:</div>
+                            <div style="color: #27ae60; font-family: monospace; font-size: 12px;">${paramsObj.usageAccessToken.substring(0, 10)}****</div>
+                        `;
+                    }
+
+                    if (paramsObj.usageUserId) {
+                        usageHtml += `
+                            <div style="color: #27ae60; font-weight: 500;">User ID:</div>
+                            <div style="color: #27ae60; font-family: monospace; font-size: 12px;">${paramsObj.usageUserId}</div>
+                        `;
+                    }
+
+                    usageHtml += '</div>';
+
+                    // Parse usage scriptif (paramsObj.usageScript) {
+                        try {
+                            // URL-safe Base64 decodinglet scriptB64 = paramsObj.usageScript
+                                .replace(/-/g, '+')
+                                .replace(/_/g, '/');
+                            // completepadding
+                            while (scriptB64.length % 4) {
+                                scriptB64 += '=';
+                            }
+                            const scriptContent = b64_to_utf8(scriptB64);
+                            usageHtml += `
+                                <div style="margin-top: 12px;">
+                                    <div style="font-size: 12px; color: #27ae60; margin-bottom: 8px; font-weight: 600;">Usage query script:</div>
+                                    <pre style="margin: 0; padding: 12px; background: #fff; border-radius: 6px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; border: 1px solid #27ae60;">${scriptContent}</pre>
+                                </div>
+                            `;
+                        } catch (e) {
+                            usageHtml += `
+                                <div style="margin-top: 12px; color: #dc3545; font-size: 12px;">
+                                    ⚠️ Script decodingFailed: ${e.message}
+                                </div>
+                            `;
+                        }
+                    }
+
+                    usageHtml += '</div>';
+                }
+
+                // Show resultsdocument.getElementById('parseBasicInfo').innerHTML = basicInfoHtml;
+                document.getElementById('parseUrlParams').innerHTML = urlParamsHtml;
+                document.getElementById('parseConfigContent').innerHTML = configHtml + usageHtml;
+                document.getElementById('parseResult').style.display = 'block';
+
+                // Scroll to resultsdocument.getElementById('parseResult').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+
+            } catch (e) {
+                alert('❌ Deep link analysisFailed：' + e.message);
+                console.error('Parse error:', e);
+            }
+        }
+
+        // Prevent default form submission behavior
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                        e.preventDefault();
+                        generateLink();
+                    }
+                });
+            });
+
+            // Initialize displayClaude FieldupdateModelFields();
+        });
+
+        // Base64 Coding functionfunction encodeToBase64() {
+            const input = document.getElementById('encodeInput').value;
+
+            if (!input.trim()) {
+                alert('❌ Please enter content to encode！');
+                return;
+            }
+
+            try {
+                const encoded = utf8_to_b64(input);
+                document.getElementById('encodeOutput').textContent = encoded;
+                document.getElementById('encodeResult').style.display = 'block';
+
+                // Scroll to resultsdocument.getElementById('encodeResult').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } catch (e) {
+                alert('❌ codingFailed：' + e.message);
+                console.error('Encode error:', e);
+            }
+        }
+
+        // Base64 Decoding functionfunction decodeFromBase64() {
+            const input = document.getElementById('decodeInput').value.trim();
+
+            if (!input) {
+                alert('❌ Please enter to decodeBase64 content!');
+                return;
+            }
+
+            try {
+                const decoded = b64_to_utf8(input);
+                document.getElementById('decodeOutput').textContent = decoded;
+                document.getElementById('decodeResult').style.display = 'block';
+
+                // Check if it isJSON，If yes, shows format button
+                try {
+                    JSON.parse(decoded);
+                    document.getElementById('jsonFormat').style.display = 'block';
+                } catch {
+                    document.getElementById('jsonFormat').style.display = 'none';
+                }
+
+                // Scroll to resultsdocument.getElementById('decodeResult').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } catch (e) {
+                alert('❌ decodingFailed：' + e.message + '\n\nPlease ensure you enter valid Base64 coding');
+                console.error('Decode error:', e);
+            }
+        }
+
+        // formatJSON
+        function formatJson() {
+            try {
+                const text = document.getElementById('decodeOutput').textContent;
+                const obj = JSON.parse(text);
+                const formatted = JSON.stringify(obj, null, 2);
+                document.getElementById('decodeOutput').textContent = formatted;
+            } catch (e) {
+                alert('❌ JSON formatFailed：' + e.message);
+            }
+        }
+
+        // CopyCoding resultsfunction copyEncoded() {
+            const text = document.getElementById('encodeOutput').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ alreadyCopy！';
+                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('CopyFailed:', err);
+                alert('❌ CopyFailed，Please manuallyCopy');
+            });
+        }
+
+        // CopyDecoding resultfunction copyDecoded() {
+            const text = document.getElementById('decodeOutput').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ alreadyCopy！';
+                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('CopyFailed:', err);
+                alert('❌ CopyFailed，Please manuallyCopy');
+            });
+        }
+
+        // ==================== Deep Link Generatorfunction====================
+
+        // Generate supplier deep linksfunction generateProviderLink() {
+            const app = document.getElementById('providerApp').value;
+            const name = document.getElementById('providerName').value.trim();
+            const apiKey = document.getElementById('providerApiKey').value.trim();
+            const endpoint = document.getElementById('providerEndpoint').value.trim();
+            const homepage = document.getElementById('providerHomepage').value.trim();
+            const model = document.getElementById('providerModel').value.trim();
+            const notes = document.getElementById('providerNotes').value.trim();
+            const enabled = document.getElementById('providerEnabled').value;
+
+            // Validate required fields
+            if (!name) {
+                alert('❌ Please fill in the supplier name');
+                return;
+            }
+
+            if (!apiKey) {
+                alert('❌ Please fill inAPI Key');
+                return;
+            }
+
+            if (!endpoint) {
+                alert('❌ Please fill inAPI Endpoint');
+                return;
+            }
+
+            if (!homepage) {
+                alert('❌ Please fill in the homepage link');
+                return;
+            }
+
+            // Build deep linkslet url = `agent-switchboard://v1/import?resource=provider&app=${app}&name=${encodeURIComponent(name)}&endpoint=${encodeURIComponent(endpoint)}&homepage=${encodeURIComponent(homepage)}&apiKey=${encodeURIComponent(apiKey)}`;
+
+            if (model) {
+                url += `&model=${encodeURIComponent(model)}`;
+            }
+
+            if (notes) {
+                url += `&notes=${encodeURIComponent(notes)}`;
+            }
+
+            if (enabled === 'true') {
+                url += '&enabled=true';
+            }
+
+            // Show resultsdocument.getElementById('providerUrl').textContent = url;
+            document.getElementById('providerImportBtn').href = url;
+            document.getElementById('providerResult').style.display = 'block';
+
+            // Scroll to resultsdocument.getElementById('providerResult').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        // generateMCP deep linkfunction generateMcpLink() {
+            const apps = document.getElementById('mcpApps').value.trim();
+            const config = document.getElementById('mcpConfig').value.trim();
+            const enabled = document.getElementById('mcpEnabled').value;
+
+            if (!apps) {
+                alert('❌ Please fill inTarget Application');
+                return;
+            }
+
+            if (!config) {
+                alert('❌ Please fill inMCP Configuration');
+                return;
+            }
+
+            try {
+                // verifyJSON Formatconst jsonObj = JSON.parse(config);
+                if (!jsonObj.mcpServers) {
+                    alert('❌ Configuration must containmcpServers Field');
+                    return;
+                }
+
+                // Base64 encoding configurationconst configB64 = utf8_to_b64(config);
+
+                // Build deep linkslet url = `agent-switchboard://v1/import?resource=mcp&apps=${encodeURIComponent(apps)}&config=${encodeURIComponent(configB64)}`;
+
+                if (enabled === 'true') {
+                    url += '&enabled=true';
+                }
+
+                // Show resultsdocument.getElementById('mcpUrl').textContent = url;
+                document.getElementById('mcpImportBtn').href = url;
+                document.getElementById('mcpResult').style.display = 'block';
+
+                // Scroll to resultsdocument.getElementById('mcpResult').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            } catch (e) {
+                alert('❌ JSON Format error:' + e.message);
+            }
+        }
+
+        // generatePrompt deep linkfunction generatePromptLink() {
+            const app = document.getElementById('promptApp').value;
+            const name = document.getElementById('promptName').value.trim();
+            const content = document.getElementById('promptContent').value.trim();
+            const description = document.getElementById('promptDescription').value.trim();
+            const enabled = document.getElementById('promptEnabled').value;
+
+            if (!name) {
+                alert('❌ Please fill in the prompt word name');
+                return;
+            }
+
+            if (!content) {
+                alert('❌ Please fill in the prompt word content');
+                return;
+            }
+
+            // Base64 Encoding contentconst contentB64 = utf8_to_b64(content);
+
+            // Build deep linkslet url = `agent-switchboard://v1/import?resource=prompt&app=${app}&name=${encodeURIComponent(name)}&content=${encodeURIComponent(contentB64)}`;
+
+            if (description) {
+                url += `&description=${encodeURIComponent(description)}`;
+            }
+
+            if (enabled === 'true') {
+                url += '&enabled=true';
+            }
+
+            // Show resultsdocument.getElementById('promptUrl').textContent = url;
+            document.getElementById('promptImportBtn').href = url;
+            document.getElementById('promptResult').style.display = 'block';
+
+            // Scroll to resultsdocument.getElementById('promptResult').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        // generateSkill deep linkfunction generateSkillLink() {
+            const repo = document.getElementById('skillRepo').value.trim();
+            const branch = document.getElementById('skillBranch').value.trim() || 'main';
+            const skillsPath = document.getElementById('skillPath').value.trim() || 'skills';
+            const directory = document.getElementById('skillDirectory').value.trim();
+
+            if (!repo) {
+                alert('❌ Please fill inGitHub Repository');
+                return;
+            }
+
+            // Verify warehouse formatif (!repo.includes('/')) {
+                alert('❌ The warehouse format should be: owner/repo-name');
+                return;
+            }
+
+            // Build deep linkslet url = `agent-switchboard://v1/import?resource=skill&repo=${encodeURIComponent(repo)}&branch=${encodeURIComponent(branch)}&skills_path=${encodeURIComponent(skillsPath)}`;
+
+            if (directory) {
+                url += `&directory=${encodeURIComponent(directory)}`;
+            }
+
+            // Show resultsdocument.getElementById('skillUrl').textContent = url;
+            document.getElementById('skillImportBtn').href = url;
+            document.getElementById('skillResult').style.display = 'block';
+
+            // Scroll to resultsdocument.getElementById('skillResult').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        // Copygenerated linkfunction copyGeneratedLink(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ alreadyCopy！';
+                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('CopyFailed:', err);
+                alert('❌ CopyFailed，Please manuallyCopy');
+            });
+        }
+
+        // Select text (clickURL hour)function selectText(element) {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    </script>
+</body>
+
+</html>
