@@ -1,0 +1,66 @@
+name: "✨ Feature Request"
+description: |
+  Propose a new feature or improvement.
+labels:
+  - enhancement
+body:
+  - type: checkboxes
+    attributes:
+      label: Self Checks
+      options:
+        - label: |
+            I have read the [FAQ](https://github.com/sacred-g/agent-switchboard#faq) section in README.
+          required: true
+        - label: |
+            I have searched for [existing issues](https://github.com/sacred-g/agent-switchboard/issues), including closed ones.
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: Related App
+      description: |
+        Which app is this feature for?
+      multiple: true
+      options:
+        - Claude Code
+        - Codex
+        - Gemini CLI
+        - OpenCode
+        - OpenClaw
+        - General
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Problem or Motivation
+      description: |
+        Is this request related to a problem? Describe the scenario.
+      placeholder: |
+        I was trying to ... and found that ...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Proposed Solution
+      description: |
+        Describe the solution you'd like.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: |
+        Any other context, mockups, or screenshots.
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Contribution
+      options:
+        - label: |
+            I am interested in contributing to this feature.
+          required: false
