@@ -2900,5 +2900,31 @@
     "expiredHint": "Run the {{tool}} command to refresh your login",
     "queryFailed": "Query failed",
     "refresh": "Refresh"
+  },
+  "workbench": {
+    "title": "Workbench",
+    "addSession": "Add Session",
+    "slotsUsed": "{{used}} of {{max}} slots used",
+    "authMode": "Account",
+    "authSubscription": "Subscription",
+    "authApi": "API",
+    "authSubscriptionHint": "Uses the CLI's own login (e.g. Claude Pro/Max, ChatGPT plan). No API keys are injected.",
+    "authApiHint": "Injects the selected provider profile's API key and base URL into the session.",
+    "provider": "Provider Profile",
+    "providerPlaceholder": "Select a provider",
+    "noProviders": "No provider profiles found for this app.",
+    "command": "Command",
+    "commandPlaceholder": "e.g. openrouter, aider, ollama run llama3",
+    "workingDirectory": "Working Directory",
+    "workingDirectoryPlaceholder": "Default: home directory",
+    "pickDirectory": "Choose directory",
+    "launch": "Launch",
+    "launchFailed": "Failed to launch session",
+    "statusRunning": "Running",
+    "statusExited": "Exited",
+    "stopSession": "Stop session",
+    "removeSession": "Remove session",
+    "removeConfirmTitle": "Remove Session",
+    "removeConfirmMessage": "This session is still running. Removing it will terminate the process. Continue?"
   }
 }

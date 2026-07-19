@@ -885,6 +885,8 @@ pub fn run() {
             let skill_service = SkillService::new();
             app.manage(commands::skill::SkillServiceState(Arc::new(skill_service)));
 
+            app.manage(commands::terminal::TerminalRegistry::default());
+
             {
                 use crate::proxy::providers::copilot_auth::CopilotAuthManager;
                 use commands::CopilotAuthState;
@@ -1395,6 +1397,11 @@ pub fn run() {
             commands::enter_lightweight_mode,
             commands::exit_lightweight_mode,
             commands::is_lightweight_mode,
+            commands::workbench_create_terminal,
+            commands::workbench_write_terminal,
+            commands::workbench_resize_terminal,
+            commands::workbench_close_terminal,
+            commands::workbench_list_terminals,
         ]);
 
     let app = builder
@@ -1526,6 +1533,9 @@ pub fn run() {
 
 ///
 pub async fn cleanup_before_exit(app_handle: &tauri::AppHandle) {
+    if let Some(registry) = app_handle.try_state::<commands::terminal::TerminalRegistry>() {
+        registry.kill_all();
+    }
     if let Some(state) = app_handle.try_state::<store::AppState>() {
         let proxy_service = &state.proxy_service;
 

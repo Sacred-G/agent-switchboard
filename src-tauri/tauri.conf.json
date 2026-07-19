@@ -56,13 +56,15 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["agent-switchboard"]
+        "schemes": [
+          "agent-switchboard"
+        ]
       }
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM4MDI4QzlBNTczOTI4RTMKUldUaktEbFhtb3dDeUM5US9kT0FmdGR5Ti9vQzcwa2dTMlpibDVDUmQ2M0VGTzVOWnd0SGpFVlEK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5RUZDNDZDNEVBNUJGMTIKUldRU3Y2Vk9iTVR2ZVFUcWlVdVV4RU00YnZvcUFobUdlaWVwVFZQVUF4c1U2d3RlQjl1bWZWYkMK",
       "endpoints": [
-        "https://github.com/farion1231/agent-switchboard/releases/latest/download/latest.json"
+        "https://github.com/sacred-g/agent-switchboard/releases/latest/download/latest.json"
       ]
     }
   }

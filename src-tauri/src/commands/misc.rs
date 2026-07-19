@@ -980,7 +980,7 @@ fn is_executable_file(path: &std::path::Path) -> bool {
     path.is_file()
 }
 
-fn get_user_shell() -> String {
+pub(crate) fn get_user_shell() -> String {
     std::env::var("SHELL")
         .ok()
         .filter(|shell| valid_user_shell_path(shell))
@@ -1025,7 +1025,7 @@ fn build_provider_command_line(shell: &str, config_path: &str, cwd: Option<&Path
     )
 }
 
-fn provider_command_flag_for_shell(shell: &str) -> &'static str {
+pub(crate) fn provider_command_flag_for_shell(shell: &str) -> &'static str {
     match shell.rsplit('/').next().unwrap_or(shell) {
         "dash" | "sh" => "-c",
         "zsh" => "-lic",
@@ -2177,7 +2177,7 @@ pub async fn open_provider_terminal(
     Ok(true)
 }
 
-fn extract_env_vars_from_config(
+pub(crate) fn extract_env_vars_from_config(
     config: &serde_json::Value,
     app_type: &AppType,
 ) -> Vec<(String, String)> {
@@ -2222,7 +2222,7 @@ fn extract_env_vars_from_config(
     env_vars
 }
 
-fn resolve_launch_cwd(cwd: Option<String>) -> Result<Option<PathBuf>, String> {
+pub(crate) fn resolve_launch_cwd(cwd: Option<String>) -> Result<Option<PathBuf>, String> {
     let Some(raw_path) = cwd.filter(|value| !value.trim().is_empty()) else {
         return Ok(None);
     };

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import {
   Shield,
   Cpu,
   LayoutDashboard,
+  LayoutGrid,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Provider, VisibleApps } from "@/types";
@@ -94,6 +95,11 @@ import ToolsPanel from "@/components/openclaw/ToolsPanel";
 import AgentsDefaultsPanel from "@/components/openclaw/AgentsDefaultsPanel";
 import OpenClawHealthBanner from "@/components/openclaw/OpenClawHealthBanner";
 import HermesMemoryPanel from "@/components/hermes/HermesMemoryPanel";
+const WorkbenchPage = lazy(() =>
+  import("@/components/workbench/WorkbenchPage").then((m) => ({
+    default: m.WorkbenchPage,
+  })),
+);
 
 type View =
   | "providers"
@@ -106,6 +112,7 @@ type View =
   | "universal"
   | "sessions"
   | "workspace"
+  | "workbench"
   | "openclawEnv"
   | "openclawTools"
   | "openclawAgents"
@@ -151,6 +158,7 @@ const VALID_VIEWS: View[] = [
   "universal",
   "sessions",
   "workspace",
+  "workbench",
   "openclawEnv",
   "openclawTools",
   "openclawAgents",
@@ -942,6 +950,12 @@ function App() {
           );
         case "workspace":
           return <WorkspaceFilesPanel />;
+        case "workbench":
+          return (
+            <Suspense fallback={null}>
+              <WorkbenchPage />
+            </Suspense>
+          );
         case "openclawEnv":
           return <EnvPanel />;
         case "openclawTools":
@@ -1165,6 +1179,7 @@ function App() {
                     })}
                   {currentView === "sessions" && t("sessionManager.title")}
                   {currentView === "workspace" && t("workspace.title")}
+                  {currentView === "workbench" && t("workbench.title")}
                   {currentView === "openclawEnv" && t("openclaw.env.title")}
                   {currentView === "openclawTools" && t("openclaw.tools.title")}
                   {currentView === "openclawAgents" &&
@@ -1200,6 +1215,15 @@ function App() {
                   className="hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <Settings className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView("workbench")}
+                  title={t("workbench.title")}
+                  className="hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <LayoutGrid className="w-4 h-4" />
                 </Button>
                 <UpdateBadge
                   onClick={() => {
