@@ -224,7 +224,6 @@ impl Database {
         )
         .map_err(|e| AppError::Database(e.to_string()))?;
 
-
         conn.execute(
             "CREATE TABLE IF NOT EXISTS proxy_live_backup (
             app_type TEXT PRIMARY KEY, original_config TEXT NOT NULL, backed_up_at TEXT NOT NULL
@@ -340,9 +339,7 @@ impl Database {
         if version > SCHEMA_VERSION {
             conn.execute("ROLLBACK TO schema_migration;", []).ok();
             conn.execute("RELEASE schema_migration;", []).ok();
-            return Err(AppError::Database(format!(
-                "{version} {SCHEMA_VERSION}。"
-            )));
+            return Err(AppError::Database(format!("{version} {SCHEMA_VERSION}。")));
         }
 
         let result = (|| {
@@ -381,7 +378,9 @@ impl Database {
                         Self::set_user_version(conn, 6)?;
                     }
                     6 => {
-                        log::info!("Migrate database from v6 to v7 (Skills update detection support)");
+                        log::info!(
+                            "Migrate database from v6 to v7 (Skills update detection support)"
+                        );
                         Self::migrate_v6_to_v7(conn)?;
                         Self::set_user_version(conn, 7)?;
                     }
@@ -406,9 +405,7 @@ impl Database {
                         Self::set_user_version(conn, 11)?;
                     }
                     _ => {
-                        return Err(AppError::Database(format!(
-                            " {version} {SCHEMA_VERSION}"
-                        )));
+                        return Err(AppError::Database(format!(" {version} {SCHEMA_VERSION}")));
                     }
                 }
                 version = Self::get_user_version(conn)?;
@@ -1146,13 +1143,9 @@ impl Database {
              FROM usage_daily_rollups_v10;
              DROP TABLE usage_daily_rollups_v10;",
         )
-        .map_err(|e| {
-            AppError::Database(format!("v10 -> v11  usage_daily_rollups failed: {e}"))
-        })?;
+        .map_err(|e| AppError::Database(format!("v10 -> v11  usage_daily_rollups failed: {e}")))?;
 
-        log::info!(
-            "v10 -> v11 : usage_daily_rollups  request_model/pricing_model "
-        );
+        log::info!("v10 -> v11 : usage_daily_rollups  request_model/pricing_model ");
         Ok(())
     }
 
@@ -2280,7 +2273,6 @@ impl Database {
         Self::repair_current_model_pricing(conn)
     }
 
-
     pub(crate) fn get_user_version(conn: &Connection) -> Result<i32, AppError> {
         conn.query_row("PRAGMA user_version;", [], |row| row.get(0))
             .map_err(|e| AppError::Database(format!("failed to read user_version: {e}")))
@@ -2409,9 +2401,7 @@ impl Database {
         Self::validate_identifier(column, "")?;
 
         if !Self::table_exists(conn, table)? {
-            return Err(AppError::Database(format!(
-                " {table}  {column}"
-            )));
+            return Err(AppError::Database(format!(" {table}  {column}")));
         }
         if Self::has_column(conn, table, column)? {
             return Ok(false);

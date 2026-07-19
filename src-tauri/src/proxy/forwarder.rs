@@ -713,9 +713,7 @@ impl RequestForwarder {
                             &self.rectifier_config,
                         ) {
                             if budget_rectifier_retried {
-                                log::warn!(
-                                    "[{app_type_str}] [RECT-013] budget Retry"
-                                );
+                                log::warn!("[{app_type_str}] [RECT-013] budget Retry");
                                 self.router
                                     .release_permit_neutral(
                                         &provider.id,
@@ -739,9 +737,7 @@ impl RequestForwarder {
 
                             let budget_rectified = rectify_thinking_budget(&mut provider_body);
                             if !budget_rectified.applied {
-                                log::warn!(
-                                    "[{app_type_str}] [RECT-014] budget Retry"
-                                );
+                                log::warn!("[{app_type_str}] [RECT-014] budget Retry");
                                 self.router
                                     .release_permit_neutral(
                                         &provider.id,
@@ -1366,16 +1362,12 @@ impl RequestForwarder {
                         }
                         Err(e) => {
                             log::error!("[CodexOAuth]  access_token failed: {e}");
-                            return Err(ProxyError::AuthError(format!(
-                                "Codex OAuth failed: {e}"
-                            )));
+                            return Err(ProxyError::AuthError(format!("Codex OAuth failed: {e}")));
                         }
                     }
                 } else {
                     log::error!("[CodexOAuth] AppHandle ");
-                    return Err(ProxyError::AuthError(
-                        "Codex OAuth  AppHandle".to_string(),
-                    ));
+                    return Err(ProxyError::AuthError("Codex OAuth  AppHandle".to_string()));
                 }
             }
 
@@ -1684,11 +1676,7 @@ impl RequestForwarder {
         log::info!("[{tag}] >>>  URL: {url} (model={request_model})");
         if log::log_enabled!(log::Level::Debug) {
             if let Ok(body_str) = serde_json::to_string(&filtered_body) {
-                log::debug!(
-                    "[{tag}] >>>  ({}): {}",
-                    body_str.len(),
-                    body_str
-                );
+                log::debug!("[{tag}] >>>  ({}): {}", body_str.len(), body_str);
             }
         }
 
@@ -1735,12 +1723,7 @@ impl RequestForwarder {
                 };
                 tokio::time::timeout(header_timeout, send)
                     .await
-                    .map_err(|_| {
-                        ProxyError::Timeout(format!(
-                            ": {}s",
-                            header_timeout.as_secs()
-                        ))
-                    })?
+                    .map_err(|_| ProxyError::Timeout(format!(": {}s", header_timeout.as_secs())))?
             } else {
                 send.await
             };
@@ -1809,10 +1792,7 @@ impl RequestForwarder {
         let body = tokio::time::timeout(body_timeout, response.bytes())
             .await
             .map_err(|_| {
-                ProxyError::Timeout(format!(
-                    "Read: {}s body ",
-                    body_timeout.as_secs()
-                ))
+                ProxyError::Timeout(format!("Read: {}s body ", body_timeout.as_secs()))
             })??;
 
         Ok(ProxyResponse::buffered(status, headers, body))
@@ -1833,21 +1813,15 @@ impl RequestForwarder {
 
         let first = tokio::time::timeout(timeout, stream.next())
             .await
-            .map_err(|_| {
-                ProxyError::Timeout(format!(
-                    ": {}s",
-                    timeout.as_secs()
-                ))
-            })?;
+            .map_err(|_| ProxyError::Timeout(format!(": {}s", timeout.as_secs())))?;
 
         let Some(first) = first else {
-            return Err(ProxyError::Forwardfailed(
-                "".to_string(),
-            ));
+            return Err(ProxyError::Forwardfailed("".to_string()));
         };
 
-        let first =
-            first.map_err(|e| ProxyError::Forwardfailed(format!("failed to read stream response first packet: {e}")))?;
+        let first = first.map_err(|e| {
+            ProxyError::Forwardfailed(format!("failed to read stream response first packet: {e}"))
+        })?;
 
         let replay = futures::stream::once(async move { Ok(first) }).chain(stream);
         Ok(ProxyResponse::streamed(status, headers, replay))
@@ -2032,9 +2006,7 @@ fn build_terminal_failure_log(
 
     Some((
         log_fwd::ALL_PROVIDERS_FAILED,
-        format!(
-            " {attempted_providers}/{total_providers}  Providerfailed。Error: {error_summary}"
-        ),
+        format!(" {attempted_providers}/{total_providers}  Providerfailed。Error: {error_summary}"),
     ))
 }
 
@@ -2055,7 +2027,10 @@ fn summarize_proxy_error(error: &ProxyError) -> String {
             format!("Request timeout: {}", summarize_text_for_log(message, 180))
         }
         ProxyError::Forwardfailed(message) => {
-            format!("Request forwarding failed: {}", summarize_text_for_log(message, 180))
+            format!(
+                "Request forwarding failed: {}",
+                summarize_text_for_log(message, 180)
+            )
         }
         ProxyError::TransformError(message) => {
             format!("failed: {}", summarize_text_for_log(message, 180))
@@ -2064,7 +2039,10 @@ fn summarize_proxy_error(error: &ProxyError) -> String {
             format!("ConfigureError: {}", summarize_text_for_log(message, 180))
         }
         ProxyError::AuthError(message) => {
-            format!("Authentication failed: {}", summarize_text_for_log(message, 180))
+            format!(
+                "Authentication failed: {}",
+                summarize_text_for_log(message, 180)
+            )
         }
         _ => summarize_text_for_log(&error.to_string(), 180),
     }
@@ -3309,7 +3287,6 @@ mod tests {
         ));
     }
 
-
     #[test]
     fn copilot_detection_via_provider_type() {
         use crate::provider::{Provider, ProviderMeta};
@@ -3349,7 +3326,10 @@ mod tests {
 
         let non_copilot_url = "https://api.anthropic.com";
         let is_not_copilot = non_copilot_url.contains("githubcopilot.com");
-        assert!(!is_not_copilot, "Non-Copilot URL should not be detected as Copilot");
+        assert!(
+            !is_not_copilot,
+            "Non-Copilot URL should not be detected as Copilot"
+        );
     }
 
     #[test]
@@ -3383,10 +3363,7 @@ mod tests {
             == Some("github_copilot")
             || enterprise_base_url.contains("githubcopilot.com");
 
-        assert!(
-            is_copilot,
-            " Copilot  provider_type "
-        );
+        assert!(is_copilot, " Copilot  provider_type ");
     }
 
     #[test]
@@ -3395,7 +3372,12 @@ mod tests {
             (true, false, true, "Copilot +  full_url "),
             (true, true, false, "Copilot + full_url "),
             (false, false, false, "Non-Copilot should not be replaced"),
-            (false, true, false, "Non-Copilot + full_url should not be replaced"),
+            (
+                false,
+                true,
+                false,
+                "Non-Copilot + full_url should not be replaced",
+            ),
         ];
 
         for (is_copilot, is_full_url, should_replace, desc) in test_cases {
@@ -3403,7 +3385,6 @@ mod tests {
             assert_eq!(will_replace, should_replace, "{desc}");
         }
     }
-
 
     fn forwarder_with_rectifier(config: RectifierConfig) -> RequestForwarder {
         let mut fwd = test_forwarder(Duration::from_secs(1), Duration::from_secs(1));
@@ -3457,7 +3438,10 @@ mod tests {
 
         let replaced = fwd.apply_media_prevention(&mut body, &provider);
 
-        assert_eq!(replaced, 1, "Default all open + models in list should be pre-replaced");
+        assert_eq!(
+            replaced, 1,
+            "Default all open + models in list should be pre-replaced"
+        );
         assert_eq!(body["messages"][0]["content"][0]["type"], "text");
     }
 

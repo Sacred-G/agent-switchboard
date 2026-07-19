@@ -54,11 +54,9 @@ pub fn classify_request(
     }
 
     let is_user_initiated = match last_msg.get("content") {
-        Some(Value::Array(blocks)) => {
-            !blocks
-                .iter()
-                .any(|block| block.get("type").and_then(|t| t.as_str()) == Some("tool_result"))
-        }
+        Some(Value::Array(blocks)) => !blocks
+            .iter()
+            .any(|block| block.get("type").and_then(|t| t.as_str()) == Some("tool_result")),
         Some(Value::String(_)) => true,
         _ => false,
     };
@@ -268,7 +266,6 @@ fn detect_subagent(body: &Value) -> bool {
         }
     }
 
-
     false
 }
 
@@ -363,7 +360,6 @@ pub fn strip_thinking_blocks(mut body: Value) -> Value {
 
     body
 }
-
 
 fn extract_system_text(body: &Value) -> String {
     match body.get("system") {
@@ -485,12 +481,10 @@ fn is_tool_result_only_message(msg: &Value) -> bool {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use serde_json::json;
-
 
     #[test]
     fn test_classify_user_text_message() {
@@ -628,7 +622,6 @@ mod tests {
         assert!(!result.is_compact);
     }
 
-
     #[test]
     fn test_warmup_with_anthropic_beta_no_tools() {
         let body = json!({
@@ -680,7 +673,6 @@ mod tests {
         assert_eq!(result.initiator, "agent");
         assert!(!result.is_warmup);
     }
-
 
     #[test]
     fn test_merge_intra_message_tool_result_text() {
@@ -789,7 +781,6 @@ mod tests {
         assert_eq!(result["messages"], body["messages"]);
     }
 
-
     #[test]
     fn test_deterministic_id_stable() {
         let body = json!({
@@ -872,7 +863,6 @@ mod tests {
         assert!(Uuid::parse_str(&id).is_ok());
     }
 
-
     #[test]
     fn test_interaction_id_stable_for_same_session() {
         let id1 = deterministic_interaction_id("session_abc");
@@ -907,7 +897,6 @@ mod tests {
         let id = deterministic_interaction_id("test_session").unwrap();
         assert!(Uuid::parse_str(&id).is_ok());
     }
-
 
     #[test]
     fn test_compact_detection_system_prompt() {
@@ -972,7 +961,6 @@ mod tests {
         });
         assert!(is_compact_request(&body));
     }
-
 
     #[test]
     fn test_detect_subagent_with_marker_in_user_message() {
@@ -1060,7 +1048,6 @@ mod tests {
         assert_eq!(result.initiator, "user");
         assert!(!result.is_subagent);
     }
-
 
     #[test]
     fn test_sanitize_orphan_tool_results_converts_orphans() {
@@ -1203,7 +1190,6 @@ mod tests {
         assert_eq!(content[0]["type"], "text");
         assert_eq!(content[1]["type"], "text");
     }
-
 
     #[test]
     fn test_strip_thinking_removes_assistant_thinking_blocks() {

@@ -5,7 +5,6 @@ use super::subscription::{
 };
 use std::time::{SystemTime, UNIX_EPOCH};
 
-
 enum CodingPlanProvider {
     Kimi,
     ZhipuCn,
@@ -182,7 +181,6 @@ async fn query_kimi(api_key: &str) -> SubscriptionQuota {
         queried_at: Some(now_millis()),
     }
 }
-
 
 enum ZhipuWindow {
     FiveHour,
@@ -1008,7 +1006,6 @@ async fn query_volcengine(
     }
 }
 
-
 fn coding_plan_not_found(error: &str) -> SubscriptionQuota {
     SubscriptionQuota {
         tool: "coding_plan".to_string(),
@@ -1468,7 +1465,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn volcengine_afp_three_windows_from_official_example() {
         let result = json!({
@@ -1528,10 +1524,7 @@ mod tests {
         assert_eq!(tiers.len(), 3);
         assert_eq!(tiers[0].name, TIER_FIVE_HOUR);
         assert!((tiers[0].utilization - 0.0).abs() < 1e-9);
-        assert!(
-            tiers[0].resets_at.is_none(),
-            "session ResetTimestamp=-1 "
-        );
+        assert!(tiers[0].resets_at.is_none(), "session ResetTimestamp=-1 ");
         assert_eq!(tiers[1].name, TIER_WEEKLY_LIMIT);
         assert!((tiers[1].utilization - 1.672568).abs() < 1e-6);
         assert!(tiers[1].resets_at.is_some());

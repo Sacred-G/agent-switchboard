@@ -26,6 +26,13 @@ export interface TerminalExitEvent {
 }
 
 export const terminalApi = {
+  async createWorkspaceDirectory(
+    parent: string,
+    folderName: string,
+  ): Promise<string> {
+    return await invoke("workbench_create_directory", { parent, folderName });
+  },
+
   async create(options: CreateTerminalOptions): Promise<boolean> {
     return await invoke("workbench_create_terminal", { ...options });
   },

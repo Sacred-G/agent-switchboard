@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,8 @@ import {
 } from "@/components/ui/select";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import { cn } from "@/lib/utils";
-import { providersApi, type AppId } from "@/lib/api";
+import { providersApi, terminalApi, type AppId } from "@/lib/api";
+import { extractErrorMessage } from "@/utils/errorUtils";
 import type { Provider } from "@/types";
 import type {
   AddSessionOptions,
@@ -77,6 +79,17 @@ interface AddSessionDialogProps {
   onSubmit: (options: AddSessionOptions) => Promise<void>;
 }
 
+type WorkspaceMode = "existing" | "create";
+
+function generateWorkspaceName(agent: WorkbenchAgent): string {
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "");
+  const prefix = agent === "custom" ? "agent" : agent;
+  return `${prefix}-workspace-${timestamp}`;
+}
+
 export function AddSessionDialog({
   open,
   onOpenChange,
@@ -89,6 +102,11 @@ export function AddSessionDialog({
   const [providerId, setProviderId] = useState<string>("");
   const [command, setCommand] = useState("");
   const [cwd, setCwd] = useState("");
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("existing");
+  const [parentDirectory, setParentDirectory] = useState("");
+  const [folderName, setFolderName] = useState(() =>
+    generateWorkspaceName(AGENT_CHOICES[0].agent),
+  );
   const [submitting, setSubmitting] = useState(false);
 
   const supportsAuthModes = Boolean(choice.app);
@@ -138,7 +156,9 @@ export function AddSessionDialog({
   const canSubmit =
     !submitting &&
     (choice.agent !== "custom" || command.trim().length > 0) &&
-    (effectiveAuthMode !== "api" || !choice.app || Boolean(providerId));
+    (effectiveAuthMode !== "api" || !choice.app || Boolean(providerId)) &&
+    (workspaceMode === "existing" ||
+      (Boolean(parentDirectory.trim()) && Boolean(folderName.trim())));
 
   const handleBrowse = async () => {
     const selected = await openFileDialog({
@@ -151,9 +171,35 @@ export function AddSessionDialog({
     }
   };
 
+  const handleParentBrowse = async () => {
+    const selected = await openFileDialog({
+      directory: true,
+      multiple: false,
+      title: t("workbench.pickParentDirectory"),
+    });
+    if (typeof selected === "string") {
+      setParentDirectory(selected);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
+    let launchDirectory = cwd.trim() || undefined;
+    if (workspaceMode === "create") {
+      try {
+        launchDirectory = await terminalApi.createWorkspaceDirectory(
+          parentDirectory.trim(),
+          folderName.trim(),
+        );
+      } catch (error) {
+        toast.error(t("workbench.workspaceCreateFailed"), {
+          description: extractErrorMessage(error) || undefined,
+        });
+        setSubmitting(false);
+        return;
+      }
+    }
     try {
       await onSubmit({
         agent: choice.agent,
@@ -163,7 +209,7 @@ export function AddSessionDialog({
         providerName:
           effectiveAuthMode === "api" ? selectedProvider?.name : undefined,
         command: choice.agent === "custom" ? command.trim() : undefined,
-        cwd: cwd.trim() || undefined,
+        cwd: launchDirectory,
       });
       onOpenChange(false);
       setCommand("");
@@ -274,23 +320,97 @@ export function AddSessionDialog({
 
           <div className="space-y-1.5">
             <Label>{t("workbench.workingDirectory")}</Label>
-            <div className="flex gap-2">
-              <Input
-                value={cwd}
-                onChange={(e) => setCwd(e.target.value)}
-                placeholder={t("workbench.workingDirectoryPlaceholder")}
-                className="font-mono"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => void handleBrowse()}
-                title={t("workbench.pickDirectory")}
-              >
-                <FolderOpen className="w-4 h-4" />
-              </Button>
+            <div className="inline-flex w-full gap-1 rounded-lg bg-muted p-1">
+              {(["existing", "create"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setWorkspaceMode(mode)}
+                  className={cn(
+                    "h-8 flex-1 rounded-md text-sm font-medium transition-colors",
+                    workspaceMode === mode
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {mode === "existing"
+                    ? t("workbench.useExistingDirectory")
+                    : t("workbench.createWorkspaceFolder")}
+                </button>
+              ))}
             </div>
+            {workspaceMode === "existing" ? (
+              <div className="flex gap-2">
+                <Input
+                  value={cwd}
+                  onChange={(e) => setCwd(e.target.value)}
+                  placeholder={t("workbench.workingDirectoryPlaceholder")}
+                  className="font-mono"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => void handleBrowse()}
+                  title={t("workbench.pickDirectory")}
+                >
+                  <FolderOpen className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2 rounded-lg border p-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">
+                    {t("workbench.parentDirectory")}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={parentDirectory}
+                      onChange={(event) =>
+                        setParentDirectory(event.target.value)
+                      }
+                      placeholder={t("workbench.parentDirectoryPlaceholder")}
+                      className="font-mono"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => void handleParentBrowse()}
+                      title={t("workbench.pickParentDirectory")}
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t("workbench.folderName")}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={folderName}
+                      onChange={(event) => setFolderName(event.target.value)}
+                      placeholder={t("workbench.folderNamePlaceholder")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setFolderName(generateWorkspaceName(choice.agent))
+                      }
+                      title={t("workbench.generateFolderName")}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                {parentDirectory.trim() && folderName.trim() && (
+                  <p className="truncate font-mono text-[11px] text-muted-foreground">
+                    {parentDirectory.replace(/[\\/]+$/, "")}/{folderName.trim()}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

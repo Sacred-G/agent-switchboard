@@ -2204,7 +2204,6 @@ mod tests {
         assert_eq!(body, original);
     }
 
-
     fn deepseek_official_provider() -> Provider {
         create_provider(json!({
             "env": {

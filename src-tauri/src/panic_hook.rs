@@ -142,7 +142,10 @@ Stack Trace (Backtrace)
             let _ = file.write_all(crash_entry.as_bytes());
             let _ = file.flush();
 
-            eprintln!("\n[Agent-Switchboard] Crash log saved to: {}", log_path.display());
+            eprintln!(
+                "\n[Agent-Switchboard] Crash log saved to: {}",
+                log_path.display()
+            );
         }
 
         eprintln!("{crash_entry}");

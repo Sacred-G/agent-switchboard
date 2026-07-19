@@ -504,8 +504,8 @@ mod tests {
                 "usage": { "output_tokens": 0 }
             }),
         ];
-        let usage = TokenUsage::from_claude_stream_events(&events)
-            .expect("cache-only  input/output gate ");
+        let usage =
+            TokenUsage::from_claude_stream_events(&events).expect("cache-only  input/output gate ");
         assert_eq!(usage.input_tokens, 0);
         assert_eq!(usage.output_tokens, 0);
         assert_eq!(usage.cache_read_tokens, 50000);

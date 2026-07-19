@@ -403,9 +403,7 @@ async fn handle_claude_transform(
         match serde_json::from_slice(&body_bytes) {
             Ok(value) => value,
             Err(_) if body_looks_like_sse(&body_str) && api_format != "gemini_native" => {
-                log::warn!(
-                    "[Claude]  SSE api_format={api_format} SSE "
-                );
+                log::warn!("[Claude]  SSE api_format={api_format} SSE ");
                 let aggregated = if api_format == "openai_responses" {
                     responses_sse_to_response_value(&body_str)
                 } else {

@@ -308,9 +308,7 @@ pub async fn head_etag(url: &str, auth: &WebDavAuth) -> Result<Option<String>, A
     )
     .send()
     .await
-    .map_err(|e| {
-        webdav_transport_error("webdav.head_failed", "HEAD ", "HEAD request", url, &e)
-    })?;
+    .map_err(|e| webdav_transport_error("webdav.head_failed", "HEAD ", "HEAD request", url, &e))?;
 
     if resp.status() == StatusCode::NOT_FOUND {
         return Ok(None);
@@ -433,11 +431,7 @@ fn response_too_large_error(url: &str, max_bytes: usize) -> AppError {
     let max_mb = max_bytes / 1024 / 1024;
     AppError::localized(
         "webdav.response_too_large",
-        format!(
-            "WebDAV Exceeded{} MB: {}",
-            max_mb,
-            redact_url(url)
-        ),
+        format!("WebDAV Exceeded{} MB: {}", max_mb, redact_url(url)),
         format!(
             "WebDAV response body exceeds limit ({} MB): {}",
             max_mb,

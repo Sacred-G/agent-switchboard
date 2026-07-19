@@ -173,10 +173,7 @@ fn schema_migration_rejects_future_version() {
 
     let err =
         Database::apply_schema_migrations_on_conn(&conn).expect_err("should reject higher version");
-    assert!(
-        err.to_string().contains(""),
-        "unexpected error: {err}"
-    );
+    assert!(err.to_string().contains(""), "unexpected error: {err}");
 }
 
 #[test]
@@ -671,11 +668,7 @@ fn schema_model_pricing_is_seeded_on_init() {
         .query_row("SELECT COUNT(*) FROM model_pricing", [], |row| row.get(0))
         .expect("count pricing");
 
-    assert!(
-        count > 0,
-        ": {}",
-        count
-    );
+    assert!(count > 0, ": {}", count);
 
     let claude_count: i64 = conn
         .query_row(
@@ -684,11 +677,7 @@ fn schema_model_pricing_is_seeded_on_init() {
             |row| row.get(0),
         )
         .expect("check claude");
-    assert!(
-        claude_count > 0,
-        " Claude : {}",
-        claude_count
-    );
+    assert!(claude_count > 0, " Claude : {}", claude_count);
 
     let gpt_count: i64 = conn
         .query_row(
@@ -697,11 +686,7 @@ fn schema_model_pricing_is_seeded_on_init() {
             |row| row.get(0),
         )
         .expect("check gpt");
-    assert!(
-        gpt_count > 0,
-        " GPT : {}",
-        gpt_count
-    );
+    assert!(gpt_count > 0, " GPT : {}", gpt_count);
 
     let gemini_count: i64 = conn
         .query_row(
@@ -710,11 +695,7 @@ fn schema_model_pricing_is_seeded_on_init() {
             |row| row.get(0),
         )
         .expect("check gemini");
-    assert!(
-        gemini_count > 0,
-        " Gemini : {}",
-        gemini_count
-    );
+    assert!(gemini_count > 0, " Gemini : {}", gemini_count);
 }
 
 #[test]

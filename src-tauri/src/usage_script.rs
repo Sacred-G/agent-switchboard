@@ -486,8 +486,7 @@ fn validate_request_url(
             parsed_request.port_or_known_default(),
             parsed_base.port_or_known_default(),
         ) {
-            (Some(request_port), Some(base_port)) if request_port == base_port => {
-            }
+            (Some(request_port), Some(base_port)) if request_port == base_port => {}
             (Some(request_port), Some(base_port)) => {
                 return Err(AppError::localized(
                     "usage_script.request_port_mismatch",
@@ -550,7 +549,6 @@ mod tests {
 
     #[test]
     fn test_port_comparison() {
-
         let test_cases = vec![
             (
                 "https://api.example.com",

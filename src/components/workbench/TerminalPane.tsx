@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Square, X } from "lucide-react";
+import { Mic, MicOff, Square, X } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import { workbenchStore, type WorkbenchSession } from "./store";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 const AGENT_ICON: Record<string, string> = {
   claude: "claude",
@@ -25,6 +27,18 @@ export function TerminalPane({
 }: TerminalPaneProps) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
+  const voice = useVoiceInput((transcript) => {
+    void workbenchStore.writeInput(session.id, transcript);
+  });
+
+  useEffect(() => {
+    if (!voice.error) return;
+    toast.error(t("workbench.voiceInputFailed"), {
+      description: t(`workbench.voiceErrors.${voice.error}`, {
+        defaultValue: voice.error,
+      }),
+    });
+  }, [t, voice.error]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -70,6 +84,34 @@ export function TerminalPane({
         {isRunning && (
           <button
             type="button"
+            onClick={voice.isListening ? voice.stop : voice.start}
+            disabled={!voice.isSupported}
+            title={
+              voice.isSupported
+                ? t(
+                    voice.isListening
+                      ? "workbench.stopVoiceInput"
+                      : "workbench.startVoiceInput",
+                  )
+                : t("workbench.voiceInputUnsupported")
+            }
+            aria-pressed={voice.isListening}
+            className={cn(
+              "p-1 rounded text-muted-foreground hover:text-foreground hover:bg-background/60",
+              voice.isListening && "bg-red-500/15 text-red-400 animate-pulse",
+              !voice.isSupported && "cursor-not-allowed opacity-40",
+            )}
+          >
+            {voice.isListening ? (
+              <MicOff className="w-3.5 h-3.5" />
+            ) : (
+              <Mic className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
+        {isRunning && (
+          <button
+            type="button"
             onClick={onClose}
             title={t("workbench.stopSession")}
             className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-background/60"
@@ -86,11 +128,19 @@ export function TerminalPane({
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div
-        ref={hostRef}
-        className="flex-1 min-h-0 p-1"
-        onMouseDown={() => workbenchStore.focus(session.id)}
-      />
+      <div className="relative flex-1 min-h-0">
+        <div
+          ref={hostRef}
+          className="h-full min-h-0 p-1"
+          onMouseDown={() => workbenchStore.focus(session.id)}
+        />
+        {voice.isListening && (
+          <div className="absolute bottom-2 left-2 right-2 rounded-md border border-red-500/30 bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg">
+            <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-red-500" />
+            {voice.preview || t("workbench.listening")}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

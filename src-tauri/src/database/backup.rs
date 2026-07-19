@@ -362,9 +362,7 @@ impl Database {
             .map_err(|e| AppError::Database(e.to_string()))?;
 
         if provider_count == 0 && mcp_count == 0 {
-            return Err(AppError::Config(
-                " SQL  MCP ".to_string(),
-            ));
+            return Err(AppError::Config(" SQL  MCP ".to_string()));
         }
         Ok(())
     }
@@ -765,8 +763,8 @@ mod tests {
     #[serial]
     fn periodic_maintenance_runs_even_when_auto_backup_disabled() -> Result<(), AppError> {
         let old_test_home = std::env::var_os("CC_SWITCH_TEST_HOME");
-        let test_home =
-            std::env::temp_dir().join("agent-switchboard-periodic-maintenance-backup-disabled-test");
+        let test_home = std::env::temp_dir()
+            .join("agent-switchboard-periodic-maintenance-backup-disabled-test");
         let _ = std::fs::remove_dir_all(&test_home);
         std::fs::create_dir_all(&test_home).expect("create test home");
         std::env::set_var("CC_SWITCH_TEST_HOME", &test_home);

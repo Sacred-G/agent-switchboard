@@ -871,7 +871,6 @@ pub fn unify_codex_session_history() -> bool {
         .unify_codex_session_history
 }
 
-
 ///
 pub fn get_current_provider(app_type: &AppType) -> Option<String> {
     let settings = settings_store().read().ok()?;
@@ -912,17 +911,12 @@ pub fn get_effective_current_provider(
             return Ok(Some(local_id));
         }
 
-        log::warn!(
-            " settings  {} ({})  fallback ",
-            local_id,
-            app_type.as_str()
-        );
+        log::warn!(" settings  {} ({})  fallback ", local_id, app_type.as_str());
         let _ = set_current_provider(app_type, None);
     }
 
     db.get_current_provider(app_type.as_str())
 }
-
 
 pub fn get_skill_sync_method() -> SyncMethod {
     settings_store()
@@ -933,7 +927,6 @@ pub fn get_skill_sync_method() -> SyncMethod {
         })
         .skill_sync_method
 }
-
 
 pub fn get_skill_storage_location() -> SkillStorageLocation {
     settings_store()
@@ -950,7 +943,6 @@ pub fn set_skill_storage_location(location: SkillStorageLocation) -> Result<(), 
         s.skill_storage_location = location;
     })
 }
-
 
 /// Get the effective auto-backup interval in hours (default 24)
 pub fn effective_backup_interval_hours() -> u32 {
@@ -977,7 +969,6 @@ pub fn effective_backup_retain_count() -> usize {
         .unwrap_or(10)
 }
 
-
 pub fn get_preferred_terminal() -> Option<String> {
     settings_store()
         .read()
@@ -988,7 +979,6 @@ pub fn get_preferred_terminal() -> Option<String> {
         .preferred_terminal
         .clone()
 }
-
 
 pub fn get_webdav_sync_settings() -> Option<WebDavSyncSettings> {
     settings_store().read().ok()?.webdav_sync.clone()
@@ -1007,7 +997,6 @@ pub fn update_webdav_sync_status(status: WebDavSyncStatus) -> Result<(), AppErro
         }
     })
 }
-
 
 pub fn get_s3_sync_settings() -> Option<S3SyncSettings> {
     settings_store().read().ok()?.s3_sync.clone()

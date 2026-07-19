@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Provider {
     pub id: String,
@@ -487,6 +486,20 @@ pub struct UniversalProviderApps {
     pub codex: bool,
     #[serde(default)]
     pub gemini: bool,
+    #[serde(default)]
+    pub opencode: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum UniversalProviderApiFormat {
+    // Default must stay OpenaiResponses: providers saved before apiFormat
+    // existed were always synced with wire_api = "responses".
+    #[default]
+    OpenaiResponses,
+    OpenaiChat,
+    Anthropic,
+    Gemini,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -527,6 +540,8 @@ pub struct UniversalProviderModels {
     pub codex: Option<CodexModelConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub gemini: Option<GeminiModelConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub opencode: Option<GeminiModelConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -535,6 +550,8 @@ pub struct UniversalProvider {
     pub name: String,
     #[serde(rename = "providerType")]
     pub provider_type: String,
+    #[serde(default, rename = "apiFormat")]
+    pub api_format: UniversalProviderApiFormat,
     pub apps: UniversalProviderApps,
     #[serde(rename = "baseUrl")]
     pub base_url: String,
@@ -574,6 +591,7 @@ impl UniversalProvider {
             id,
             name,
             provider_type,
+            api_format: UniversalProviderApiFormat::default(),
             apps: UniversalProviderApps::default(),
             base_url,
             api_key,
@@ -660,6 +678,10 @@ impl UniversalProvider {
             base_trimmed.to_string()
         };
 
+        let wire_api = match self.api_format {
+            UniversalProviderApiFormat::OpenaiChat => "chat",
+            _ => "responses",
+        };
         let config_toml = format!(
             r#"model_provider = "custom"
 model = "{model}"
@@ -669,7 +691,7 @@ disable_response_storage = true
 [model_providers.custom]
 name = "NewAPI"
 base_url = "{codex_base_url}"
-wire_api = "responses"
+wire_api = "{wire_api}"
 requires_openai_auth = true"#
         );
 
@@ -716,6 +738,51 @@ requires_openai_auth = true"#
 
         Some(Provider {
             id: format!("universal-gemini-{}", self.id),
+            name: self.name.clone(),
+            settings_config,
+            website_url: self.website_url.clone(),
+            category: Some("aggregator".to_string()),
+            created_at: self.created_at,
+            sort_index: self.sort_index,
+            notes: self.notes.clone(),
+            meta: self.meta.clone(),
+            icon: self.icon.clone(),
+            icon_color: self.icon_color.clone(),
+            in_failover_queue: false,
+        })
+    }
+
+    pub fn to_opencode_provider(&self) -> Option<Provider> {
+        if !self.apps.opencode {
+            return None;
+        }
+
+        let model = self
+            .models
+            .opencode
+            .as_ref()
+            .and_then(|models| models.model.clone())
+            .unwrap_or_else(|| "gpt-4o".to_string());
+        let npm = match self.api_format {
+            UniversalProviderApiFormat::OpenaiResponses => "@ai-sdk/openai",
+            UniversalProviderApiFormat::OpenaiChat => "@ai-sdk/openai-compatible",
+            UniversalProviderApiFormat::Anthropic => "@ai-sdk/anthropic",
+            UniversalProviderApiFormat::Gemini => "@ai-sdk/google",
+        };
+        let settings_config = serde_json::json!({
+            "npm": npm,
+            "name": self.name,
+            "options": {
+                "baseURL": self.base_url,
+                "apiKey": self.api_key,
+            },
+            "models": {
+                model.clone(): { "name": model }
+            }
+        });
+
+        Some(Provider {
+            id: format!("universal-opencode-{}", self.id),
             name: self.name.clone(),
             settings_config,
             website_url: self.website_url.clone(),
@@ -810,6 +877,7 @@ mod tests {
     use super::{
         ClaudeModelConfig, CodexModelConfig, GeminiModelConfig, LocalProxyRequestOverrides,
         OpenCodeProviderConfig, Provider, ProviderManager, ProviderMeta, UniversalProvider,
+        UniversalProviderApiFormat,
     };
     use serde_json::json;
     use std::collections::HashMap;
@@ -1071,6 +1139,78 @@ mod tests {
             .expect("config toml");
 
         assert!(config.contains("base_url = \"https://api.example.com/v1\""));
+    }
+
+    #[test]
+    fn universal_provider_api_format_defaults_to_responses_for_legacy_rows() {
+        // Rows saved before apiFormat existed must keep wire_api = "responses".
+        let json = serde_json::json!({
+            "id": "legacy",
+            "name": "Legacy",
+            "providerType": "newapi",
+            "apps": { "claude": false, "codex": true, "gemini": false },
+            "baseUrl": "https://api.example.com/v1",
+            "apiKey": "key"
+        });
+        let universal: UniversalProvider =
+            serde_json::from_value(json).expect("legacy row deserializes");
+
+        let provider = universal.to_codex_provider().expect("codex provider");
+        let config = provider.settings_config["config"]
+            .as_str()
+            .expect("config toml");
+        assert!(config.contains("wire_api = \"responses\""));
+    }
+
+    #[test]
+    fn universal_provider_uses_selected_codex_api_format() {
+        let mut universal = UniversalProvider::new(
+            "u1".to_string(),
+            "OpenRouter".to_string(),
+            "openrouter".to_string(),
+            "https://openrouter.ai/api/v1".to_string(),
+            "api-key".to_string(),
+        );
+        universal.apps.codex = true;
+        universal.api_format = UniversalProviderApiFormat::OpenaiChat;
+
+        let provider = universal.to_codex_provider().expect("codex provider");
+        let config = provider.settings_config["config"]
+            .as_str()
+            .expect("config toml");
+
+        assert!(config.contains("wire_api = \"chat\""));
+    }
+
+    #[test]
+    fn universal_provider_to_opencode_uses_selected_api_format_and_model() {
+        let mut universal = UniversalProvider::new(
+            "u1".to_string(),
+            "OpenRouter".to_string(),
+            "openrouter".to_string(),
+            "https://openrouter.ai/api/v1".to_string(),
+            "api-key".to_string(),
+        );
+        universal.apps.opencode = true;
+        universal.api_format = UniversalProviderApiFormat::OpenaiChat;
+        universal.models.opencode = Some(GeminiModelConfig {
+            model: Some("anthropic/claude-sonnet-4.6".to_string()),
+        });
+
+        let provider = universal.to_opencode_provider().expect("opencode provider");
+
+        assert_eq!(provider.id, "universal-opencode-u1");
+        assert_eq!(
+            provider.settings_config["npm"].as_str(),
+            Some("@ai-sdk/openai-compatible")
+        );
+        assert_eq!(
+            provider.settings_config["options"]["baseURL"].as_str(),
+            Some("https://openrouter.ai/api/v1")
+        );
+        assert!(provider.settings_config["models"]
+            .get("anthropic/claude-sonnet-4.6")
+            .is_some());
     }
 
     #[test]

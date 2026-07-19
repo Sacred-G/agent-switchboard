@@ -11,7 +11,6 @@ use tokio::sync::RwLock;
 
 pub struct CopilotAuthState(pub Arc<RwLock<CopilotAuthManager>>);
 
-
 ///
 #[tauri::command]
 pub async fn copilot_start_device_flow(
@@ -75,7 +74,6 @@ pub async fn copilot_poll_for_account(
     }
 }
 
-
 #[tauri::command]
 pub async fn copilot_list_accounts(
     state: State<'_, CopilotAuthState>,
@@ -108,7 +106,6 @@ pub async fn copilot_set_default_account(
         .map_err(|e| e.to_string())
 }
 
-
 #[tauri::command]
 pub async fn copilot_get_auth_status(
     state: State<'_, CopilotAuthState>,
@@ -128,7 +125,6 @@ pub async fn copilot_logout(state: State<'_, CopilotAuthState>) -> Result<(), St
     let auth_manager = state.0.write().await;
     auth_manager.clear_auth().await.map_err(|e| e.to_string())
 }
-
 
 ///
 #[tauri::command]
@@ -151,7 +147,6 @@ pub async fn copilot_get_token_for_account(
         .await
         .map_err(|e| e.to_string())
 }
-
 
 #[tauri::command]
 pub async fn copilot_get_models(

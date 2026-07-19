@@ -2326,10 +2326,7 @@ mod tests {
             50,
         )?;
         assert_eq!(logs.total, 2, "claude  desktop ");
-        assert!(
-            logs.data.iter().any(|r| r.app_type == "claude-desktop"),
-            ""
-        );
+        assert!(logs.data.iter().any(|r| r.app_type == "claude-desktop"), "");
 
         let codex_summary = db.get_usage_summary(None, None, Some("codex"), None, None)?;
         assert_eq!(codex_summary.total_requests, 0);
@@ -3723,10 +3720,7 @@ mod tests {
 
     #[test]
     fn test_strip_model_date_suffix_is_utf8_safe() {
-        assert_eq!(
-            strip_model_date_suffix("-2026-05-14").as_deref(),
-            Some("")
-        );
+        assert_eq!(strip_model_date_suffix("-2026-05-14").as_deref(), Some(""));
         assert_eq!(strip_model_date_suffix("abc🚀12345678"), None);
     }
 
@@ -3747,10 +3741,7 @@ mod tests {
         }
 
         let result = find_model_pricing_row(&conn, "gpt-5")?;
-        assert!(
-            result.is_none(),
-            "Missing gpt-5  gpt-5-mini/gpt-5-pro"
-        );
+        assert!(result.is_none(), "Missing gpt-5  gpt-5-mini/gpt-5-pro");
 
         Ok(())
     }
@@ -3776,10 +3767,7 @@ mod tests {
         )?;
 
         let result = find_model_pricing_row(&conn, "claude-sonnet-4-5-20250929")?;
-        assert!(
-            result.is_some(),
-            " claude-sonnet-4-5-20250929"
-        );
+        assert!(result.is_some(), " claude-sonnet-4-5-20250929");
 
         let result = find_model_pricing_row(&conn, "anthropic/claude-haiku-4.5")?;
         assert!(
@@ -3787,31 +3775,16 @@ mod tests {
             " anthropic/claude-haiku-4.5  claude-haiku-4.5"
         );
         let result = find_model_pricing_row(&conn, "moonshotai/kimi-k2-0905:exa")?;
-        assert!(
-            result.is_some(),
-            "+ kimi-k2-0905"
-        );
+        assert!(result.is_some(), "+ kimi-k2-0905");
 
         let result = find_model_pricing_row(&conn, "gpt-5.2-codex@low")?;
-        assert!(
-            result.is_some(),
-            " @  gpt-5.2-codex@low  gpt-5.2-codex-low"
-        );
+        assert!(result.is_some(), " @  gpt-5.2-codex@low  gpt-5.2-codex-low");
         let result = find_model_pricing_row(&conn, "OpenAI/GPT-5.5@HIGH")?;
-        assert!(
-            result.is_some(),
-            " GPT-5.5  gpt-5.5-high"
-        );
+        assert!(result.is_some(), " GPT-5.5  gpt-5.5-high");
         let result = find_model_pricing_row(&conn, "OpenAI/GPT-5.5-2026-05-14")?;
-        assert!(
-            result.is_some(),
-            "OpenAI  gpt-5.5 "
-        );
+        assert!(result.is_some(), "OpenAI  gpt-5.5 ");
         let result = find_model_pricing_row(&conn, "google/gemini-3-pro-preview-20260514")?;
-        assert!(
-            result.is_some(),
-            "Gemini  gemini-3-pro-preview "
-        );
+        assert!(result.is_some(), "Gemini  gemini-3-pro-preview ");
 
         let result = find_model_pricing_row(&conn, "claude-haiku-4-5")?;
         assert!(
@@ -3825,33 +3798,18 @@ mod tests {
         );
 
         let result = find_model_pricing_row(&conn, "claude-gpt-5.5")?;
-        assert!(
-            result.is_some(),
-            " claude-  Anthropic "
-        );
+        assert!(result.is_some(), " claude-  Anthropic ");
 
         let result =
             find_model_pricing_row(&conn, "global.anthropic.claude-haiku-4-5-20251001-v1:0")?;
-        assert!(
-            result.is_some(),
-            "Bedrock/Vertex  Claude  ID  Claude "
-        );
+        assert!(result.is_some(), "Bedrock/Vertex  Claude  ID  Claude ");
         let result = find_model_pricing_row(&conn, "global.anthropic.claude-opus-4-8-v1:0")?;
-        assert!(
-            result.is_some(),
-            "Bedrock  Claude Opus 4.8  ID  Claude "
-        );
+        assert!(result.is_some(), "Bedrock  Claude Opus 4.8  ID  Claude ");
         let result = find_model_pricing_row(&conn, "claude-opus-4-8@20260527")?;
-        assert!(
-            result.is_some(),
-            "Vertex  Claude Opus 4.8  ID  Claude "
-        );
+        assert!(result.is_some(), "Vertex  Claude Opus 4.8  ID  Claude ");
 
         let result = find_model_pricing_row(&conn, "gpt-5.4@low")?;
-        assert!(
-            result.is_some(),
-            "Missing effort  gpt-5.4 "
-        );
+        assert!(result.is_some(), "Missing effort  gpt-5.4 ");
 
         let result = find_model_pricing_row(&conn, "kimi-for-coding")?;
         assert!(result.is_none(), "kimi-for-coding  token ");

@@ -94,10 +94,7 @@ impl PromptService {
                             let backup_id = format!("backup-{timestamp}");
                             let backup_prompt = Prompt {
                                 id: backup_id.clone(),
-                                name: format!(
-                                    " {}",
-                                    chrono::Local::now().format("%Y-%m-%d %H:%M")
-                                ),
+                                name: format!(" {}", chrono::Local::now().format("%Y-%m-%d %H:%M")),
                                 content: live_content,
                                 description: Some("".to_string()),
                                 enabled: false,
@@ -148,10 +145,7 @@ impl PromptService {
         let id = format!("imported-{timestamp}");
         let prompt = Prompt {
             id: id.clone(),
-            name: format!(
-                " {}",
-                chrono::Local::now().format("%Y-%m-%d %H:%M")
-            ),
+            name: format!(" {}", chrono::Local::now().format("%Y-%m-%d %H:%M")),
             content,
             description: Some("Configure".to_string()),
             enabled: false,

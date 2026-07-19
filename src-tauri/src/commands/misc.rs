@@ -38,8 +38,8 @@ pub async fn copy_text_to_clipboard(text: String) -> Result<bool, String> {
     // Use spawn_blocking to avoid blocking the async runtime
     // Clipboard access can block on some platforms and may have thread/loop constraints
     tokio::task::spawn_blocking(move || {
-        let mut clipboard =
-            arboard::Clipboard::new().map_err(|e| format!("failed to access system clipboard: {e}"))?;
+        let mut clipboard = arboard::Clipboard::new()
+            .map_err(|e| format!("failed to access system clipboard: {e}"))?;
         clipboard
             .set_text(text)
             .map_err(|e| format!("Writefailed: {e}"))?;
@@ -1843,10 +1843,7 @@ fn prefers_official_update(tool: &str, shell: LifecycleCommandShell) -> bool {
             matches!(tool, "claude" | "opencode" | "openclaw")
         }
         LifecycleCommandShell::WindowsBatch => {
-            matches!(
-                tool,
-                "claude" | "openclaw"
-            )
+            matches!(tool, "claude" | "openclaw")
         }
     }
 }
@@ -2898,8 +2895,7 @@ read -r _
     {
         use std::os::unix::fs::PermissionsExt;
 
-        std::fs::write(&script_file, &script_content)
-            .map_err(|e| format!("Writefailed: {e}"))?;
+        std::fs::write(&script_file, &script_content).map_err(|e| format!("Writefailed: {e}"))?;
         std::fs::set_permissions(&script_file, std::fs::Permissions::from_mode(0o755))
             .map_err(|e| format!("failed to set script permissions: {e}"))?;
 
@@ -2933,8 +2929,7 @@ read -r _
         use std::os::unix::fs::PermissionsExt;
         use std::process::Command;
 
-        std::fs::write(&script_file, &script_content)
-            .map_err(|e| format!("Writefailed: {e}"))?;
+        std::fs::write(&script_file, &script_content).map_err(|e| format!("Writefailed: {e}"))?;
         std::fs::set_permissions(&script_file, std::fs::Permissions::from_mode(0o755))
             .map_err(|e| format!("failed to set script permissions: {e}"))?;
 

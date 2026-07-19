@@ -350,7 +350,6 @@ impl CopilotAuthManager {
         manager
     }
 
-
     pub async fn list_accounts(&self) -> Vec<GitHubAccount> {
         let accounts = self.accounts.read().await.clone();
         let default_account_id = self.resolve_default_account_id().await;
@@ -468,7 +467,6 @@ impl CopilotAuthManager {
         Ok(())
     }
 
-
     pub async fn start_device_flow(
         &self,
         github_domain: Option<&str>,
@@ -503,10 +501,7 @@ impl CopilotAuthManager {
             .await
             .map_err(|e| CopilotAuthError::ParseError(e.to_string()))?;
 
-        log::info!(
-            "[CopilotAuth] Successuser_code: {}",
-            device_code.user_code
-        );
+        log::info!("[CopilotAuth] Successuser_code: {}", device_code.user_code);
 
         Ok(device_code)
     }
@@ -581,7 +576,6 @@ impl CopilotAuthManager {
         Ok(Some(account))
     }
 
-
     pub async fn get_valid_token_for_account(
         &self,
         account_id: &str,
@@ -632,9 +626,10 @@ impl CopilotAuthManager {
             .await?;
 
         let tokens = self.copilot_tokens.read().await;
-        tokens.get(account_id).map(|t| t.token.clone()).ok_or(
-            CopilotAuthError::CopilotTokenFetchfailed("".to_string()),
-        )
+        tokens
+            .get(account_id)
+            .map(|t| t.token.clone())
+            .ok_or(CopilotAuthError::CopilotTokenFetchfailed("".to_string()))
     }
 
     pub async fn get_valid_token(&self) -> Result<String, CopilotAuthError> {
@@ -645,7 +640,6 @@ impl CopilotAuthManager {
             None => Err(CopilotAuthError::GitHubTokenInvalid),
         }
     }
-
 
     pub async fn fetch_models_for_account(
         &self,
@@ -814,7 +808,6 @@ impl CopilotAuthManager {
         }
     }
 
-
     pub async fn get_api_endpoint(&self, account_id: &str) -> String {
         let _ = self.ensure_migration_complete().await;
 
@@ -838,9 +831,7 @@ impl CopilotAuthManager {
         match self.fetch_and_cache_endpoint(account_id).await {
             Ok(endpoint) => endpoint,
             Err(e) => {
-                log::debug!(
-                    "[CopilotAuth]  {account_id}  API failed: {e}"
-                );
+                log::debug!("[CopilotAuth]  {account_id}  API failed: {e}");
                 let domain = self.get_account_domain(account_id).await;
                 copilot_api_base(&domain)
             }
@@ -852,9 +843,7 @@ impl CopilotAuthManager {
 
         match self.resolve_default_account_id().await {
             Some(id) => self.get_api_endpoint(&id).await,
-            None => {
-                copilot_api_base(DEFAULT_GITHUB_DOMAIN)
-            }
+            None => copilot_api_base(DEFAULT_GITHUB_DOMAIN),
         }
     }
 
@@ -999,7 +988,6 @@ impl CopilotAuthManager {
 
         Ok(())
     }
-
 
     fn fallback_default_account_id(
         accounts: &HashMap<String, GitHubAccountData>,
@@ -1212,7 +1200,6 @@ impl CopilotAuthManager {
         Ok(())
     }
 
-
     fn load_from_disk_sync(&self) -> Result<(), CopilotAuthError> {
         if !self.storage_path.exists() {
             return Ok(());
@@ -1317,10 +1304,7 @@ impl CopilotAuthManager {
 
         self.write_store_atomic(&content)?;
 
-        log::info!(
-            "[CopilotAuth] Success{} accounts",
-            store.accounts.len()
-        );
+        log::info!("[CopilotAuth] Success{} accounts", store.accounts.len());
 
         Ok(())
     }

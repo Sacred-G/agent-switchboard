@@ -76,7 +76,6 @@ fn sync_codex_provider_writes_config_without_touching_auth() {
 
     let mut config = MultiAppConfig::default();
 
-
     let provider_config = json!({
         "auth": {
             "OPENAI_API_KEY": "codex-key"

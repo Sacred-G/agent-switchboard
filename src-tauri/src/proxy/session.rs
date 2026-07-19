@@ -33,10 +33,6 @@ impl ClientFormat {
             ClientFormat::OpenAI
         } else if path.contains("/v1internal/") && path.contains("generateContent") {
             ClientFormat::GeminiCli
-        } else if (path.contains("/v1beta/") || path.contains("/v1/"))
-            && path.contains("generateContent")
-        {
-            ClientFormat::Gemini
         } else if path.contains("generateContent") {
             ClientFormat::Gemini
         } else {
@@ -252,7 +248,6 @@ fn extract_codex_session(headers: &HeaderMap, body: &serde_json::Value) -> Optio
         }
     }
 
-
     None
 }
 
@@ -420,7 +415,6 @@ mod tests {
         assert_eq!(ClientFormat::GeminiCli.as_str(), "gemini_cli");
         assert_eq!(ClientFormat::Unknown.as_str(), "unknown");
     }
-
 
     #[test]
     fn test_extract_session_from_claude_metadata_user_id() {

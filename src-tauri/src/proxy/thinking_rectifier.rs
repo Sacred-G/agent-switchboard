@@ -231,7 +231,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_detect_invalid_signature() {
         assert!(should_rectify_thinking_signature(
@@ -342,7 +341,6 @@ mod tests {
         ));
     }
 
-
     #[test]
     fn test_rectify_removes_thinking_blocks() {
         let mut body = json!({
@@ -438,7 +436,6 @@ mod tests {
         assert_eq!(result.removed_thinking_blocks, 1);
     }
 
-
     #[test]
     fn test_detect_signature_extra_inputs() {
         assert!(should_rectify_thinking_signature(
@@ -478,7 +475,6 @@ mod tests {
             &enabled_config()
         ));
     }
-
 
     #[test]
     fn test_rectify_keeps_adaptive_when_no_legacy_blocks() {
@@ -579,7 +575,6 @@ mod tests {
         assert!(content[0].get("signature").is_none());
         assert_eq!(body["thinking"]["type"], "adaptive");
     }
-
 
     #[test]
     fn test_normalize_thinking_type_adaptive_unchanged() {

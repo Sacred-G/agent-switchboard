@@ -82,10 +82,7 @@ pub(crate) async fn read_decoded_body(
         tokio::time::timeout(body_timeout, response.bytes())
             .await
             .map_err(|_| {
-                ProxyError::Timeout(format!(
-                    "Read: {}s body ",
-                    body_timeout.as_secs()
-                ))
+                ProxyError::Timeout(format!("Read: {}s body ", body_timeout.as_secs()))
             })??
     };
 
@@ -200,11 +197,7 @@ pub async fn handle_non_streaming(
         read_decoded_body(response, ctx.tag, body_timeout).await?;
     strip_hop_by_hop_response_headers(&mut response_headers);
 
-    log::debug!(
-        "[{}] : {}",
-        ctx.tag,
-        String::from_utf8_lossy(&body_bytes)
-    );
+    log::debug!("[{}] : {}", ctx.tag, String::from_utf8_lossy(&body_bytes));
 
     if usage_logging_enabled(state) {
         if let Ok(json_value) = serde_json::from_slice::<Value>(&body_bytes) {
@@ -249,17 +242,10 @@ pub async fn handle_non_streaming(
                     status.as_u16(),
                     false,
                 );
-                log::debug!(
-                    "[{}] Parse usage ",
-                    parser_config.app_type_str
-                );
+                log::debug!("[{}] Parse usage ", parser_config.app_type_str);
             }
         } else {
-            log::debug!(
-                "[{}] <<<  ( JSON): {} bytes",
-                ctx.tag,
-                body_bytes.len()
-            );
+            log::debug!("[{}] <<<  ( JSON): {} bytes", ctx.tag, body_bytes.len());
             spawn_log_usage(
                 state,
                 ctx,
@@ -667,7 +653,7 @@ pub fn create_logged_passthrough_stream(
                         Err(_) => {
                             let timeout_type = if is_first_chunk { "First byte" } else { "Cooldown period" };
                             log::error!("[{tag}] {} ({})", timeout_type, duration.as_secs());
-                            yield Err(std::io::Error::other(format!("{timeout_type}")));
+                            yield Err(std::io::Error::other(timeout_type.to_string()));
                             break;
                         }
                     }
@@ -692,7 +678,7 @@ pub fn create_logged_passthrough_stream(
                                 for line in event_text.lines() {
                                     if let Some(data) = strip_sse_field(line, "data") {
                                         if data.trim() != "[DONE]" {
-                                            let collected = match &collector {
+                                            let _collected = match &collector {
                                                 Some(c) if c.should_collect(data) => {
                                                     match serde_json::from_str::<Value>(data) {
                                                         Ok(json_value) => {
@@ -704,11 +690,7 @@ pub fn create_logged_passthrough_stream(
                                                 }
                                                 _ => false,
                                             };
-                                            if collected {
-                                                log::debug!("[{tag}] <<< SSE : {data}");
-                                            } else {
-                                                log::debug!("[{tag}] <<< SSE : {data}");
-                                            }
+                                            log::debug!("[{tag}] <<< SSE : {data}");
                                         } else {
                                             log::debug!("[{tag}] <<< SSE: [DONE]");
                                         }

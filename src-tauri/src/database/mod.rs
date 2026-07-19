@@ -31,7 +31,6 @@ use rusqlite::{hooks::Action, Connection};
 use serde::Serialize;
 use std::sync::Mutex;
 
-
 pub(crate) const SCHEMA_VERSION: i32 = 11;
 
 pub(crate) fn to_json_string<T: Serialize>(value: &T) -> Result<String, AppError> {

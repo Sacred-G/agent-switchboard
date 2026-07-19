@@ -210,7 +210,6 @@ impl CodexOAuthManager {
         manager
     }
 
-
     ///
     /// - device_code = device_auth_id
     /// - user_code = user_code
@@ -280,11 +279,8 @@ impl CodexOAuthManager {
             pending.get(device_code).cloned()
         };
 
-        let entry = entry.ok_or_else(|| {
-            CodexOAuthError::TokenFetchfailed(
-                " user_code".to_string(),
-            )
-        })?;
+        let entry =
+            entry.ok_or_else(|| CodexOAuthError::TokenFetchfailed(" user_code".to_string()))?;
 
         if entry.expires_at_ms <= chrono::Utc::now().timestamp_millis() {
             let mut pending = self.pending_device_codes.write().await;
@@ -345,9 +341,8 @@ impl CodexOAuthManager {
         })?;
 
         let (account_id, email) = extract_identity_from_tokens(&tokens);
-        let account_id = account_id.ok_or_else(|| {
-            CodexOAuthError::ParseError(" token  account_id".to_string())
-        })?;
+        let account_id = account_id
+            .ok_or_else(|| CodexOAuthError::ParseError(" token  account_id".to_string()))?;
 
         {
             let mut tokens_cache = self.access_tokens.write().await;
@@ -435,7 +430,6 @@ impl CodexOAuthManager {
             .map_err(|e| CodexOAuthError::ParseError(e.to_string()))
     }
 
-
     pub async fn get_valid_token_for_account(
         &self,
         account_id: &str,
@@ -505,16 +499,13 @@ impl CodexOAuthManager {
     pub async fn get_valid_token(&self) -> Result<String, CodexOAuthError> {
         match self.resolve_default_account_id().await {
             Some(id) => self.get_valid_token_for_account(&id).await,
-            None => Err(CodexOAuthError::AccountNotFound(
-                " ChatGPT ".to_string(),
-            )),
+            None => Err(CodexOAuthError::AccountNotFound(" ChatGPT ".to_string())),
         }
     }
 
     pub async fn default_account_id(&self) -> Option<String> {
         self.resolve_default_account_id().await
     }
-
 
     pub async fn list_accounts(&self) -> Vec<GitHubAccount> {
         let accounts = self.accounts.read().await.clone();
@@ -624,7 +615,6 @@ impl CodexOAuthManager {
             username,
         }
     }
-
 
     async fn add_account_internal(
         &self,
@@ -810,10 +800,7 @@ impl CodexOAuthManager {
 
         self.write_store_atomic(&content)?;
 
-        log::info!(
-            "[CodexOAuth] Success{} accounts",
-            store.accounts.len()
-        );
+        log::info!("[CodexOAuth] Success{} accounts", store.accounts.len());
 
         Ok(())
     }
@@ -826,7 +813,6 @@ pub struct CodexOAuthStatus {
     pub authenticated: bool,
     pub username: Option<String>,
 }
-
 
 ///
 fn parse_interval(value: Option<&serde_json::Value>) -> u64 {

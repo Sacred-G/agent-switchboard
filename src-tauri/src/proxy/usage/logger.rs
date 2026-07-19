@@ -1,4 +1,3 @@
-
 use super::calculator::{CostBreakdown, CostCalculator, ModelPricing};
 use super::parser::TokenUsage;
 use crate::database::{Database, PRICING_SOURCE_REQUEST, PRICING_SOURCE_RESPONSE};
@@ -229,9 +228,7 @@ impl<'a> UsageLogger<'a> {
         {
             default_pricing_source_raw
         } else {
-            log::warn!(
-                "[USG-003] Invalid (app_type={app_type}): {default_pricing_source_raw}"
-            );
+            log::warn!("[USG-003] Invalid (app_type={app_type}): {default_pricing_source_raw}");
             PRICING_SOURCE_RESPONSE.to_string()
         };
 
@@ -256,9 +253,7 @@ impl<'a> UsageLogger<'a> {
             Some(value) => match Decimal::from_str(value) {
                 Ok(parsed) => parsed,
                 Err(e) => {
-                    log::warn!(
-                        "[USG-003] Parsefailed (provider_id={provider_id}): {value} - {e}"
-                    );
+                    log::warn!("[USG-003] Parsefailed (provider_id={provider_id}): {value} - {e}");
                     default_multiplier
                 }
             },

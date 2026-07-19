@@ -57,8 +57,7 @@ fn create_backup(conflicts: &[EnvConflict]) -> Result<BackupInfo, String> {
     };
 
     // Write backup file
-    let json = serde_json::to_string_pretty(&backup_info)
-        .map_err(|e| format!("failed: {e}"))?;
+    let json = serde_json::to_string_pretty(&backup_info).map_err(|e| format!("failed: {e}"))?;
 
     fs::write(&backup_file, json).map_err(|e| format!("Writefailed: {e}"))?;
 
@@ -189,10 +188,7 @@ fn restore_single_env(conflict: &EnvConflict) -> Result<(), String> {
             }
             Ok(())
         }
-        _ => Err(format!(
-            " {} ",
-            conflict.source_type
-        )),
+        _ => Err(format!(" {} ", conflict.source_type)),
     }
 }
 
@@ -221,10 +217,7 @@ fn restore_single_env(conflict: &EnvConflict) -> Result<(), String> {
 
             Ok(())
         }
-        _ => Err(format!(
-            " {} ",
-            conflict.source_type
-        )),
+        _ => Err(format!(" {} ", conflict.source_type)),
     }
 }
 

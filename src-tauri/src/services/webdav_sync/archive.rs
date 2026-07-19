@@ -92,10 +92,7 @@ pub(crate) fn restore_skills_zip(raw: &[u8]) -> Result<(), AppError> {
     if archive.len() > MAX_EXTRACT_ENTRIES {
         return Err(localized(
             "webdav.sync.skills_zip_too_many_entries",
-            format!(
-                "skills.zip {} {MAX_EXTRACT_ENTRIES}",
-                archive.len()
-            ),
+            format!("skills.zip {} {MAX_EXTRACT_ENTRIES}", archive.len()),
             format!(
                 "skills.zip has too many entries ({}), limit is {MAX_EXTRACT_ENTRIES}",
                 archive.len()

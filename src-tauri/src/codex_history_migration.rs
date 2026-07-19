@@ -541,8 +541,9 @@ fn restore_codex_state_db_official_threads(
 
     let mut conn = Connection::open(db_path)
         .map_err(|e| AppError::Database(format!(" Codex state DB failed: {e}")))?;
-    conn.busy_timeout(Duration::from_secs(5))
-        .map_err(|e| AppError::Database(format!("failed to set Codex state DB busy_timeout: {e}")))?;
+    conn.busy_timeout(Duration::from_secs(5)).map_err(|e| {
+        AppError::Database(format!("failed to set Codex state DB busy_timeout: {e}"))
+    })?;
 
     if !Database::table_exists(&conn, "threads")?
         || !Database::has_column(&conn, "threads", "model_provider")?
@@ -1116,8 +1117,9 @@ fn migrate_codex_state_db_provider_bucket(
 
     let mut conn = Connection::open(db_path)
         .map_err(|e| AppError::Database(format!(" Codex state DB failed: {e}")))?;
-    conn.busy_timeout(Duration::from_secs(5))
-        .map_err(|e| AppError::Database(format!("failed to set Codex state DB busy_timeout: {e}")))?;
+    conn.busy_timeout(Duration::from_secs(5)).map_err(|e| {
+        AppError::Database(format!("failed to set Codex state DB busy_timeout: {e}"))
+    })?;
 
     if !Database::table_exists(&conn, "threads")?
         || !Database::has_column(&conn, "threads", "model_provider")?
@@ -1151,7 +1153,9 @@ fn migrate_codex_state_db_provider_bucket(
         .map_err(|e| AppError::Database(format!(" Codex state DB failed: {e}")))?;
     let changed = tx
         .execute(&update_sql, params_from_iter(values.iter()))
-        .map_err(|e| AppError::Database(format!("failed to migrate Codex state DB provider: {e}")))?;
+        .map_err(|e| {
+            AppError::Database(format!("failed to migrate Codex state DB provider: {e}"))
+        })?;
     tx.commit()
         .map_err(|e| AppError::Database(format!(" Codex state DB failed: {e}")))?;
     Ok(changed)
@@ -1561,7 +1565,8 @@ base_url = "https://proxy.example/v1"
             .is_none());
 
         let agent_switchboard_config: toml::Value =
-            toml::from_str(&config_provider_id("legacy-agent-switchboard")).expect("parse agent-switchboard config");
+            toml::from_str(&config_provider_id("legacy-agent-switchboard"))
+                .expect("parse agent-switchboard config");
         assert_eq!(
             agent_switchboard_config
                 .get("model_provider")

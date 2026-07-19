@@ -752,10 +752,7 @@ impl MultiAppConfig {
                     existing.apps.set_enabled_for(&app, enabled);
 
                     if existing.server != *entry.get("server").unwrap_or(&serde_json::json!({})) {
-                        conflicts.push(format!(
-                            "MCP '{id}'  {} ConfigureConfigure",
-                            app.as_str()
-                        ));
+                        conflicts.push(format!("MCP '{id}'  {} ConfigureConfigure", app.as_str()));
                     }
                 } else {
                     let name = entry

@@ -170,7 +170,11 @@ pub fn migrate_cc_switch_dir() {
     let old_dir = home.join(".agent-switchboard");
     let new_dir = home.join(".agent-switchboard");
     if old_dir.exists() && !new_dir.exists() {
-        log::info!("Migrating config directory from {} to {}", old_dir.display(), new_dir.display());
+        log::info!(
+            "Migrating config directory from {} to {}",
+            old_dir.display(),
+            new_dir.display()
+        );
         if let Err(e) = std::fs::rename(&old_dir, &new_dir) {
             log::error!("failed to rename config directory: {e}");
         }

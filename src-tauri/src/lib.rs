@@ -1,3 +1,5 @@
+#![allow(clippy::empty_docs)]
+
 mod app_config;
 mod app_store;
 mod auto_launch;
@@ -1398,6 +1400,7 @@ pub fn run() {
             commands::exit_lightweight_mode,
             commands::is_lightweight_mode,
             commands::workbench_create_terminal,
+            commands::workbench_create_directory,
             commands::workbench_write_terminal,
             commands::workbench_resize_terminal,
             commands::workbench_close_terminal,

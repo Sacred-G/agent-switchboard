@@ -319,7 +319,10 @@ mod tests {
             ..WebDavSyncSettings::default()
         };
         let segs = remote_dir_segments(&settings, RemoteLayout::Current);
-        assert_eq!(segs, vec!["agent-switchboard-sync", "v2", "db-v6", "default"]);
+        assert_eq!(
+            segs,
+            vec!["agent-switchboard-sync", "v2", "db-v6", "default"]
+        );
     }
 
     #[test]

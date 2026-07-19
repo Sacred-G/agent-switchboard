@@ -47,8 +47,8 @@ pub fn sync_opencode_usage(db: &Database) -> Result<SessionSyncResult, AppError>
 
     let db_path_str = db_path.to_string_lossy().to_string();
 
-    let metadata = fs::metadata(&db_path)
-        .map_err(|e| AppError::Config(format!("Read opencode.db : {e}")))?;
+    let metadata =
+        fs::metadata(&db_path).map_err(|e| AppError::Config(format!("Read opencode.db : {e}")))?;
     let mut file_modified = metadata_modified_nanos(&metadata);
 
     let wal_path = db_path.with_extension("db-wal");
@@ -171,7 +171,9 @@ fn query_sessions(conn: &rusqlite::Connection) -> Result<Vec<(String, i64)>, App
 
     let mut sessions = Vec::new();
     for row in rows {
-        sessions.push(row.map_err(|e| AppError::Database(format!("failed to read session lines: {e}")))?);
+        sessions.push(
+            row.map_err(|e| AppError::Database(format!("failed to read session lines: {e}")))?,
+        );
     }
 
     Ok(sessions)

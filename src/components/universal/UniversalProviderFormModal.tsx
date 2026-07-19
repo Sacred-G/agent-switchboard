@@ -6,11 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FullScreenPanel } from "@/components/common/FullScreenPanel";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import JsonEditor from "@/components/JsonEditor";
-import type { UniversalProvider, UniversalProviderModels } from "@/types";
+import type {
+  UniversalProvider,
+  UniversalProviderApiFormat,
+  UniversalProviderModels,
+} from "@/types";
 import {
   universalProviderPresets,
   createUniversalProviderFromPreset,
@@ -44,6 +55,8 @@ export function UniversalProviderFormModal({
   const [name, setName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [apiFormat, setApiFormat] =
+    useState<UniversalProviderApiFormat>("openai_chat");
   const [showApiKey, setShowApiKey] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [notes, setNotes] = useState("");
@@ -51,6 +64,7 @@ export function UniversalProviderFormModal({
   const [claudeEnabled, setClaudeEnabled] = useState(true);
   const [codexEnabled, setCodexEnabled] = useState(true);
   const [geminiEnabled, setGeminiEnabled] = useState(true);
+  const [opencodeEnabled, setOpencodeEnabled] = useState(true);
 
   const [models, setModels] = useState<UniversalProviderModels>({});
 
@@ -63,11 +77,15 @@ export function UniversalProviderFormModal({
       setName(editingProvider.name);
       setBaseUrl(editingProvider.baseUrl);
       setApiKey(editingProvider.apiKey);
+      // Providers saved before apiFormat existed always used the
+      // OpenAI Responses wire API for Codex.
+      setApiFormat(editingProvider.apiFormat || "openai_responses");
       setWebsiteUrl(editingProvider.websiteUrl || "");
       setNotes(editingProvider.notes || "");
       setClaudeEnabled(editingProvider.apps.claude);
       setCodexEnabled(editingProvider.apps.codex);
       setGeminiEnabled(editingProvider.apps.gemini);
+      setOpencodeEnabled(editingProvider.apps.opencode ?? false);
       setModels(editingProvider.models || {});
 
       const preset = universalProviderPresets.find(
@@ -80,11 +98,13 @@ export function UniversalProviderFormModal({
       setName(defaultPreset.name);
       setBaseUrl("");
       setApiKey("");
+      setApiFormat(defaultPreset.apiFormat);
       setWebsiteUrl(defaultPreset.websiteUrl || "");
       setNotes("");
       setClaudeEnabled(defaultPreset.defaultApps.claude);
       setCodexEnabled(defaultPreset.defaultApps.codex);
       setGeminiEnabled(defaultPreset.defaultApps.gemini);
+      setOpencodeEnabled(defaultPreset.defaultApps.opencode);
       setModels(deepClone(defaultPreset.defaultModels));
     }
   }, [editingProvider, initialPreset, isOpen]);
@@ -94,9 +114,11 @@ export function UniversalProviderFormModal({
       setSelectedPreset(preset);
       if (!isEditMode) {
         setName(preset.name);
+        setApiFormat(preset.apiFormat);
         setClaudeEnabled(preset.defaultApps.claude);
         setCodexEnabled(preset.defaultApps.codex);
         setGeminiEnabled(preset.defaultApps.gemini);
+        setOpencodeEnabled(preset.defaultApps.opencode);
         setModels(deepClone(preset.defaultModels));
       }
     },
@@ -104,7 +126,11 @@ export function UniversalProviderFormModal({
   );
 
   const updateModel = useCallback(
-    (app: "claude" | "codex" | "gemini", field: string, value: string) => {
+    (
+      app: "claude" | "codex" | "gemini" | "opencode",
+      field: string,
+      value: string,
+    ) => {
       setModels((prev) => ({
         ...prev,
         [app]: {
@@ -180,6 +206,7 @@ requires_openai_auth = true`;
       ? {
           ...editingProvider,
           name: name.trim(),
+          apiFormat,
           baseUrl: baseUrl.trim(),
           apiKey: apiKey.trim(),
           websiteUrl: websiteUrl.trim() || undefined,
@@ -188,6 +215,7 @@ requires_openai_auth = true`;
             claude: claudeEnabled,
             codex: codexEnabled,
             gemini: geminiEnabled,
+            opencode: opencodeEnabled,
           },
           models,
         }
@@ -204,6 +232,7 @@ requires_openai_auth = true`;
         claude: claudeEnabled,
         codex: codexEnabled,
         gemini: geminiEnabled,
+        opencode: opencodeEnabled,
       };
       provider.models = models;
       provider.websiteUrl = websiteUrl.trim() || undefined;
@@ -217,11 +246,13 @@ requires_openai_auth = true`;
     name,
     baseUrl,
     apiKey,
+    apiFormat,
     websiteUrl,
     notes,
     claudeEnabled,
     codexEnabled,
     geminiEnabled,
+    opencodeEnabled,
     models,
     selectedPreset,
     onSave,
@@ -237,6 +268,7 @@ requires_openai_auth = true`;
       ? {
           ...editingProvider,
           name: name.trim(),
+          apiFormat,
           baseUrl: baseUrl.trim(),
           apiKey: apiKey.trim(),
           websiteUrl: websiteUrl.trim() || undefined,
@@ -245,6 +277,7 @@ requires_openai_auth = true`;
             claude: claudeEnabled,
             codex: codexEnabled,
             gemini: geminiEnabled,
+            opencode: opencodeEnabled,
           },
           models,
         }
@@ -261,6 +294,7 @@ requires_openai_auth = true`;
         claude: claudeEnabled,
         codex: codexEnabled,
         gemini: geminiEnabled,
+        opencode: opencodeEnabled,
       };
       provider.models = models;
       provider.websiteUrl = websiteUrl.trim() || undefined;
@@ -273,11 +307,13 @@ requires_openai_auth = true`;
     name,
     baseUrl,
     apiKey,
+    apiFormat,
     websiteUrl,
     notes,
     claudeEnabled,
     codexEnabled,
     geminiEnabled,
+    opencodeEnabled,
     models,
     selectedPreset,
   ]);
@@ -405,6 +441,34 @@ requires_openai_auth = true`;
           </div>
 
           <div className="space-y-2">
+            <Label>API Format</Label>
+            <Select
+              value={apiFormat}
+              onValueChange={(value) =>
+                setApiFormat(value as UniversalProviderApiFormat)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="openai_responses">
+                  OpenAI Responses
+                </SelectItem>
+                <SelectItem value="openai_chat">
+                  OpenAI-compatible Chat
+                </SelectItem>
+                <SelectItem value="anthropic">Anthropic Messages</SelectItem>
+                <SelectItem value="gemini">Google Gemini</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Select the protocol the endpoint actually implements. App support
+              depends on this format.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="apiKey">
               {t("universalProvider.apiKey", { defaultValue: "API Key" })}
             </Label>
@@ -501,6 +565,16 @@ requires_openai_auth = true`;
               <Switch
                 checked={geminiEnabled}
                 onCheckedChange={setGeminiEnabled}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <ProviderIcon icon="opencode" name="OpenCode" size={20} />
+                <span className="font-medium">OpenCode</span>
+              </div>
+              <Switch
+                checked={opencodeEnabled}
+                onCheckedChange={setOpencodeEnabled}
               />
             </div>
           </div>
@@ -619,6 +693,27 @@ requires_openai_auth = true`;
                     updateModel("gemini", "model", e.target.value)
                   }
                   placeholder="gemini-2.5-pro"
+                />
+              </div>
+            </div>
+          )}
+
+          {opencodeEnabled && (
+            <div className="space-y-3 rounded-lg border p-4">
+              <div className="flex items-center gap-2 font-medium">
+                <ProviderIcon icon="opencode" name="OpenCode" size={16} />
+                OpenCode
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">
+                  {t("universalProvider.model", { defaultValue: "Model" })}
+                </Label>
+                <Input
+                  value={models.opencode?.model || ""}
+                  onChange={(e) =>
+                    updateModel("opencode", "model", e.target.value)
+                  }
+                  placeholder="provider/model-name"
                 />
               </div>
             </div>

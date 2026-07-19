@@ -1,4 +1,3 @@
-
 use super::types::OptimizerConfig;
 use serde_json::{json, Value};
 

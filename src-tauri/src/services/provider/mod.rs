@@ -1448,7 +1448,9 @@ impl ProviderService {
                             .proxy_service
                             .sync_claude_live_from_provider_while_proxy_active(&provider),
                     )
-                    .map_err(|e| AppError::Message(format!("Sync Claude Live Configurefailed: {e}")))?;
+                    .map_err(|e| {
+                        AppError::Message(format!("Sync Claude Live Configurefailed: {e}"))
+                    })?;
                 }
             } else {
                 write_live_with_common_config(state.db.as_ref(), &app_type, &provider)?;
@@ -1516,9 +1518,7 @@ impl ProviderService {
         let db_current = state.db.get_current_provider(app_type.as_str())?;
 
         if local_current.as_deref() == Some(id) || db_current.as_deref() == Some(id) {
-            return Err(AppError::Message(
-                "".to_string(),
-            ));
+            return Err(AppError::Message("".to_string()));
         }
 
         state.db.delete_provider(app_type.as_str(), id)
@@ -1661,11 +1661,7 @@ impl ProviderService {
             // Proxy takeover mode: hot-switch without restoring upstream Live config.
             // The proxy layer may still refresh proxy-safe Live fields so client labels
             // follow the selected provider while endpoints remain local.
-            log::info!(
-                ":  {}  {}",
-                app_type.as_str(),
-                id
-            );
+            log::info!(":  {}  {}", app_type.as_str(), id);
 
             futures::executor::block_on(
                 state
@@ -2716,6 +2712,10 @@ impl ProviderService {
                 let gemini_id = format!("universal-gemini-{id}");
                 let _ = state.db.delete_provider("gemini", &gemini_id);
             }
+            if p.apps.opencode {
+                let opencode_id = format!("universal-opencode-{id}");
+                let _ = state.db.delete_provider("opencode", &opencode_id);
+            }
         }
 
         Ok(true)
@@ -2761,6 +2761,21 @@ impl ProviderService {
         } else {
             let gemini_id = format!("universal-gemini-{id}");
             let _ = state.db.delete_provider("gemini", &gemini_id);
+        }
+
+        if let Some(mut opencode_provider) = provider.to_opencode_provider() {
+            if let Some(existing) = state
+                .db
+                .get_provider_by_id(&opencode_provider.id, "opencode")?
+            {
+                let mut merged = existing.settings_config.clone();
+                Self::merge_json(&mut merged, &opencode_provider.settings_config);
+                opencode_provider.settings_config = merged;
+            }
+            state.db.save_provider("opencode", &opencode_provider)?;
+        } else {
+            let opencode_id = format!("universal-opencode-{id}");
+            let _ = state.db.delete_provider("opencode", &opencode_id);
         }
 
         Ok(true)

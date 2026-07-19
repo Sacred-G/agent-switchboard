@@ -141,7 +141,10 @@ pub fn sync_codex_usage(db: &Database) -> Result<SessionSyncResult, AppError> {
                 result.skipped += skipped;
             }
             Err(e) => {
-                let msg = format!("failed to parse Codex session file {}: {e}", file_path.display());
+                let msg = format!(
+                    "failed to parse Codex session file {}: {e}",
+                    file_path.display()
+                );
                 log::warn!("[CODEX-SYNC] {msg}");
                 result.errors.push(msg);
             }
@@ -212,8 +215,8 @@ fn sync_single_codex_file(db: &Database, file_path: &Path) -> Result<(u32, u32),
         return Ok((0, 0));
     }
 
-    let file =
-        fs::File::open(file_path).map_err(|e| AppError::Config(format!("failed to open file: {e}")))?;
+    let file = fs::File::open(file_path)
+        .map_err(|e| AppError::Config(format!("failed to open file: {e}")))?;
     let reader = BufReader::new(file);
 
     let mut state = FileParseState {
@@ -661,7 +664,6 @@ mod tests {
         Ok(())
     }
 
-
     #[test]
     fn test_normalize_codex_model_lowercase() {
         assert_eq!(normalize_codex_model("GLM-4.6"), "glm-4.6");
@@ -724,7 +726,7 @@ mod tests {
             output: 50,
         });
         let current = CumulativeTokens {
-            input: 110,       // delta = 10
+            input: 110, // delta = 10
             cached_input: 80,
             output: 60,
         };

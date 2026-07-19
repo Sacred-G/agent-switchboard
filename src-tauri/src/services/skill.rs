@@ -15,7 +15,6 @@ use crate::config::get_app_config_dir;
 use crate::database::Database;
 use crate::error::format_skill_error;
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum SyncMethod {
@@ -148,7 +147,6 @@ pub struct MigrationResult {
     pub errors: Vec<String>,
 }
 
-
 ///
 #[derive(Debug, Clone, Deserialize)]
 struct SkillsShApiResponse {
@@ -231,7 +229,6 @@ struct LegacySkillMigrationRow {
     directory: String,
     app_type: String,
 }
-
 
 #[derive(Deserialize)]
 struct AgentsLockFile {
@@ -330,7 +327,11 @@ fn parse_agents_lock() -> HashMap<String, LockRepoInfo> {
             if e.kind() == std::io::ErrorKind::NotFound {
                 log::debug!(" agents lock : {}", path.display());
             } else {
-                log::warn!("failed to read agents lock file ({}): {}", path.display(), e);
+                log::warn!(
+                    "failed to read agents lock file ({}): {}",
+                    path.display(),
+                    e
+                );
             }
             return HashMap::new();
         }
@@ -338,7 +339,11 @@ fn parse_agents_lock() -> HashMap<String, LockRepoInfo> {
     let lock: AgentsLockFile = match serde_json::from_str(&content) {
         Ok(l) => l,
         Err(e) => {
-            log::warn!("failed to parse agents lock file ({}): {}", path.display(), e);
+            log::warn!(
+                "failed to parse agents lock file ({}): {}",
+                path.display(),
+                e
+            );
             return HashMap::new();
         }
     };
@@ -365,10 +370,7 @@ fn parse_agents_lock() -> HashMap<String, LockRepoInfo> {
             ))
         })
         .collect();
-    log::info!(
-        "agents lock Parse {}  github skill",
-        parsed.len()
-    );
+    log::info!("agents lock Parse {}  github skill", parsed.len());
     parsed
 }
 
@@ -407,7 +409,6 @@ impl SkillService {
         }
         Some(path.to_string())
     }
-
 
     pub fn get_ssot_dir() -> Result<PathBuf> {
         let location = crate::settings::get_skill_storage_location();
@@ -484,7 +485,6 @@ impl SkillService {
         })
     }
 
-
     pub fn get_all_installed(db: &Arc<Database>) -> Result<Vec<InstalledSkill>> {
         let skills = db.get_all_installed_skills()?;
         Ok(skills.into_values().collect())
@@ -527,11 +527,7 @@ impl SkillService {
                     updated.apps.set_enabled_for(current_app, true);
                     db.save_skill(&updated)?;
                     Self::sync_to_app_dir(&updated.directory, current_app)?;
-                    log::info!(
-                        "Skill {}  {:?} ",
-                        updated.name,
-                        current_app
-                    );
+                    log::info!("Skill {}  {:?} ", updated.name, current_app);
                     return Ok(updated);
                 } else {
                     return Err(anyhow!(format_skill_error(
@@ -677,11 +673,7 @@ impl SkillService {
 
         Self::sync_to_app_dir(&install_name, current_app)?;
 
-        log::info!(
-            "Skill {} Success {:?}",
-            installed_skill.name,
-            current_app
-        );
+        log::info!("Skill {} Success {:?}", installed_skill.name, current_app);
 
         Ok(installed_skill)
     }
@@ -718,7 +710,6 @@ impl SkillService {
 
         Ok(SkillUninstallResult { backup_path })
     }
-
 
     ///
     pub fn compute_dir_hash(dir: &Path) -> Result<String> {
@@ -1208,11 +1199,7 @@ impl SkillService {
             }
         }
 
-        log::info!(
-            "Skill {}  {}",
-            restored_skill.name,
-            restore_path.display()
-        );
+        log::info!("Skill {}  {}", restored_skill.name, restore_path.display());
 
         Ok(restored_skill)
     }
@@ -1392,7 +1379,6 @@ impl SkillService {
         Ok(imported)
     }
 
-
     ///
     #[cfg(unix)]
     fn create_symlink(src: &Path, dest: &Path) -> Result<()> {
@@ -1504,10 +1490,7 @@ impl SkillService {
 
         let manifest = source.join("SKILL.md");
         if !manifest.is_file() {
-            return Err(anyhow!(
-                "Skill Missing SKILL.mdSync: {}",
-                source.display()
-            ));
+            return Err(anyhow!("Skill Missing SKILL.mdSync: {}", source.display()));
         }
 
         Ok(())
@@ -1544,11 +1527,7 @@ impl SkillService {
 
         fs::rename(&tmp, dest).with_context(|| {
             let _ = Self::remove_path(&tmp);
-            format!(
-                " Skill failed: {} -> {}",
-                tmp.display(),
-                dest.display()
-            )
+            format!(" Skill failed: {} -> {}", tmp.display(), dest.display())
         })?;
 
         Ok(())
@@ -1641,7 +1620,6 @@ impl SkillService {
 
         Ok(())
     }
-
 
     pub async fn discover_available(
         &self,
@@ -2212,10 +2190,7 @@ impl SkillService {
 
     fn create_uninstall_backup(skill: &InstalledSkill) -> Result<Option<PathBuf>> {
         let Some(source_path) = Self::resolve_uninstall_backup_source(skill)? else {
-            log::warn!(
-                "Skill {} ",
-                skill.directory
-            );
+            log::warn!("Skill {} ", skill.directory);
             return Ok(None);
         };
 
@@ -2255,11 +2230,7 @@ impl SkillService {
             log::warn!(" Skill failed: {err:#}");
         }
 
-        log::info!(
-            "Skill {}  {}",
-            skill.name,
-            backup_path.display()
-        );
+        log::info!("Skill {}  {}", skill.name, backup_path.display());
 
         Ok(Some(backup_path))
     }
@@ -2277,11 +2248,7 @@ impl SkillService {
             let resolved = match resolved.canonicalize() {
                 Ok(p) => p,
                 Err(_) => {
-                    log::warn!(
-                        "Symlink : {} -> {}",
-                        link_path.display(),
-                        target
-                    );
+                    log::warn!("Symlink : {} -> {}", link_path.display(), target);
                     continue;
                 }
             };
@@ -2306,7 +2273,6 @@ impl SkillService {
         }
         Ok(())
     }
-
 
     ///
     pub fn install_from_zip(
@@ -2516,7 +2482,6 @@ impl SkillService {
         Ok(())
     }
 
-
     pub fn list_repos(&self, store: &SkillStore) -> Vec<SkillRepo> {
         store.repos.clone()
     }
@@ -2542,7 +2507,6 @@ impl SkillService {
 
         Ok(())
     }
-
 
     pub async fn search_skills_sh(
         query: &str,
@@ -2601,7 +2565,6 @@ impl SkillService {
         })
     }
 }
-
 
 ///
 fn build_repo_info_from_lock(

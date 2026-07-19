@@ -342,9 +342,7 @@ fn handle_auto_click(app: &tauri::AppHandle, app_type: &AppType) -> Result<(), A
             let current_id =
                 crate::settings::get_effective_current_provider(&app_state.db, app_type)?;
             let Some(current_id) = current_id else {
-                return Err(AppError::Message(
-                    "Not Set Auto ".to_string(),
-                ));
+                return Err(AppError::Message("Not Set Auto ".to_string()));
             };
             app_state
                 .db
@@ -384,9 +382,7 @@ fn handle_auto_click(app: &tauri::AppHandle, app_type: &AppType) -> Result<(), A
             proxy_service.switch_proxy_target(app_type_str, &p1_provider_id),
         ) {
             log::error!("[Tray] Auto  P1 failed: {e}");
-            return Err(AppError::Message(format!(
-                "Auto  P1 failed: {e}"
-            )));
+            return Err(AppError::Message(format!("Auto  P1 failed: {e}")));
         }
 
         if let Ok(new_menu) = create_tray_menu(app, app_state.inner()) {
@@ -496,9 +492,7 @@ pub fn create_tray_menu(
         if providers.is_empty() {
             let label = format!("{} {}", section.header_label, tray_texts.no_providers_label);
             let empty_item = MenuItem::with_id(app, section.empty_id, &label, false, None::<&str>)
-                .map_err(|e| {
-                    AppError::Message(format!("{}failed: {e}", section.log_name))
-                })?;
+                .map_err(|e| AppError::Message(format!("{}failed: {e}", section.log_name)))?;
             menu_builder = menu_builder.item(&empty_item);
         } else {
             let current_provider = providers.get(&current_id);
@@ -541,15 +535,13 @@ pub fn create_tray_menu(
                     is_current,
                     None::<&str>,
                 )
-                .map_err(|e| {
-                    AppError::Message(format!("{}failed: {e}", section.log_name))
-                })?;
+                .map_err(|e| AppError::Message(format!("{}failed: {e}", section.log_name)))?;
                 submenu_builder = submenu_builder.item(&item);
             }
 
-            let submenu = submenu_builder.build().map_err(|e| {
-                AppError::Message(format!("{}failed: {e}", section.log_name))
-            })?;
+            let submenu = submenu_builder
+                .build()
+                .map_err(|e| AppError::Message(format!("{}failed: {e}", section.log_name)))?;
             section_handles.insert(section.app_type.clone(), submenu.clone());
             menu_builder = menu_builder.item(&submenu);
         }
@@ -679,7 +671,10 @@ pub fn handle_tray_menu_event(app: &tauri::AppHandle, event_id: &str) {
             }
         }
         "open_website" => {
-            if let Err(e) = app.opener().open_url("https://agent-switchboard.io", None::<String>) {
+            if let Err(e) = app
+                .opener()
+                .open_url("https://agent-switchboard.io", None::<String>)
+            {
                 log::error!("failed: {e}");
             }
         }

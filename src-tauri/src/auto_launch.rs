@@ -14,8 +14,7 @@ fn get_macos_app_bundle_path(exe_path: &std::path::Path) -> Option<std::path::Pa
 
 fn get_auto_launch() -> Result<AutoLaunch, AppError> {
     let app_name = "Agent Switchboard";
-    let exe_path =
-        std::env::current_exe().map_err(|e| AppError::Message(format!(": {e}")))?;
+    let exe_path = std::env::current_exe().map_err(|e| AppError::Message(format!(": {e}")))?;
 
     #[cfg(target_os = "macos")]
     let app_path = get_macos_app_bundle_path(&exe_path).unwrap_or(exe_path);
@@ -65,19 +64,24 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn test_get_macos_app_bundle_path_valid() {
-        let exe_path = std::path::Path::new("/Applications/Agent Switchboard.app/Contents/MacOS/Agent Switchboard");
+        let exe_path = std::path::Path::new(
+            "/Applications/Agent Switchboard.app/Contents/MacOS/Agent Switchboard",
+        );
         let result = get_macos_app_bundle_path(exe_path);
         assert_eq!(
             result,
-            Some(std::path::PathBuf::from("/Applications/Agent Switchboard.app"))
+            Some(std::path::PathBuf::from(
+                "/Applications/Agent Switchboard.app"
+            ))
         );
     }
 
     #[cfg(target_os = "macos")]
     #[test]
     fn test_get_macos_app_bundle_path_with_spaces() {
-        let exe_path =
-            std::path::Path::new("/Users/test/My Apps/Agent Switchboard.app/Contents/MacOS/Agent Switchboard");
+        let exe_path = std::path::Path::new(
+            "/Users/test/My Apps/Agent Switchboard.app/Contents/MacOS/Agent Switchboard",
+        );
         let result = get_macos_app_bundle_path(exe_path);
         assert_eq!(
             result,

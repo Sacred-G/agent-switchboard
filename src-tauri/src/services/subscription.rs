@@ -7,7 +7,6 @@ use std::collections::HashMap;
 
 use crate::config;
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CredentialStatus {
@@ -79,7 +78,6 @@ impl SubscriptionQuota {
         }
     }
 }
-
 
 #[derive(Deserialize)]
 struct ClaudeOAuthEntry {
@@ -249,7 +247,6 @@ fn is_token_expired(expires_at: &serde_json::Value) -> bool {
     }
 }
 
-
 #[derive(Deserialize)]
 struct ApiUsageWindow {
     utilization: Option<f64>,
@@ -397,7 +394,6 @@ async fn query_claude_quota(access_token: &str) -> SubscriptionQuota {
         queried_at: Some(now_millis()),
     }
 }
-
 
 #[derive(Deserialize)]
 struct CodexAuthJson {
@@ -555,7 +551,6 @@ fn is_codex_token_stale(last_refresh: &str) -> bool {
     }
 }
 
-
 #[derive(Deserialize)]
 struct CodexRateLimitWindow {
     used_percent: Option<f64>,
@@ -686,7 +681,6 @@ pub(crate) async fn query_codex_quota(
         queried_at: Some(now_millis()),
     }
 }
-
 
 #[derive(Deserialize)]
 struct GeminiOAuthCredsFile {
@@ -871,7 +865,6 @@ fn parse_gemini_file_json(content: &str) -> GeminiCredentials {
     )
 }
 
-
 const GEMINI_OAUTH_CLIENT_ID: &str =
     "681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com";
 const GEMINI_OAUTH_CLIENT_SECRET: &str = "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";
@@ -900,7 +893,6 @@ async fn refresh_gemini_token(refresh_token: &str) -> Option<String> {
     let body: serde_json::Value = resp.json().await.ok()?;
     body.get("access_token")?.as_str().map(String::from)
 }
-
 
 #[derive(Deserialize)]
 struct GeminiLoadCodeAssistResponse {
@@ -1120,7 +1112,6 @@ async fn query_gemini_quota(access_token: &str) -> SubscriptionQuota {
     }
 }
 
-
 pub async fn get_subscription_quota(tool: &str) -> Result<SubscriptionQuota, String> {
     match tool {
         "claude" => {
@@ -1230,7 +1221,6 @@ pub async fn get_subscription_quota(tool: &str) -> Result<SubscriptionQuota, Str
         _ => Ok(SubscriptionQuota::not_found(tool)),
     }
 }
-
 
 fn now_millis() -> i64 {
     SystemTime::now()

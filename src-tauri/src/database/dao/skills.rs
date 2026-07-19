@@ -169,7 +169,6 @@ impl Database {
         Ok(affected > 0)
     }
 
-
     pub fn get_skill_repos(&self) -> Result<Vec<SkillRepo>, AppError> {
         let conn = lock_conn!(self.conn);
         let mut stmt = conn

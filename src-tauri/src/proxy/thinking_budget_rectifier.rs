@@ -152,7 +152,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_detect_budget_tokens_thinking_error() {
         assert!(should_rectify_thinking_budget(
@@ -209,7 +208,6 @@ mod tests {
             &master_disabled_config()
         ));
     }
-
 
     #[test]
     fn test_rectify_budget_basic() {

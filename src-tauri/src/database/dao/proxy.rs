@@ -373,7 +373,6 @@ impl Database {
         Ok(())
     }
 
-
     pub async fn get_proxy_config(&self) -> Result<ProxyConfig, AppError> {
         let result = {
             let conn = lock_conn!(self.conn);

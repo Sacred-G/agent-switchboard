@@ -1,4 +1,3 @@
-
 use serde_json::Value;
 
 use crate::error::AppError;
@@ -51,9 +50,9 @@ pub fn extract_server_spec(entry: &Value) -> Result<Value, AppError> {
     let obj = entry
         .as_object()
         .ok_or_else(|| AppError::McpValidation("MCP server entry must be a JSON object".into()))?;
-    let server = obj
-        .get("server")
-        .ok_or_else(|| AppError::McpValidation("MCP server entry is missing server field".into()))?;
+    let server = obj.get("server").ok_or_else(|| {
+        AppError::McpValidation("MCP server entry is missing server field".into())
+    })?;
 
     if !server.is_object() {
         return Err(AppError::McpValidation(

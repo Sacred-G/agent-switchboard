@@ -22,8 +22,9 @@ impl Database {
             .ok();
 
         match result {
-            Some(json) => serde_json::from_str(&json)
-                .map_err(|e| AppError::Database(format!("failed to parse unified provider data: {e}"))),
+            Some(json) => serde_json::from_str(&json).map_err(|e| {
+                AppError::Database(format!("failed to parse unified provider data: {e}"))
+            }),
             None => Ok(HashMap::new()),
         }
     }

@@ -76,7 +76,7 @@ pub async fn stream_check_all_providers(
             StreamCheckService::check_with_retry(&app_type, &provider, &config, base_url_override)
                 .await
                 .unwrap_or_else(|e| StreamCheckResult {
-                    status: HealthStatus::failed,
+                    status: HealthStatus::Failed,
                     success: false,
                     message: e.to_string(),
                     response_time_ms: None,

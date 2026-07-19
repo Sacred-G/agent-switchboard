@@ -423,10 +423,7 @@ impl ProxyService {
 
         let app_handle = self.app_handle.read().await.clone();
         let server = ProxyServer::new(config.clone(), self.db.clone(), app_handle);
-        let info = server
-            .start()
-            .await
-            .map_err(|e| format!("failed: {e}"))?;
+        let info = server.start().await.map_err(|e| format!("failed: {e}"))?;
         if let Err(e) = self
             .persist_ephemeral_listen_port_if_needed(&config, info.port)
             .await
@@ -636,9 +633,7 @@ impl ProxyService {
                         let _ = self.db.delete_live_backup(app_type_str).await;
                     }
                     Err(restore_err) => {
-                        log::error!(
-                            "{app_type_str}  Live Configurefailed: {restore_err}"
-                        );
+                        log::error!("{app_type_str}  Live Configurefailed: {restore_err}");
                     }
                 }
                 return Err(e);
@@ -835,9 +830,7 @@ impl ProxyService {
                                 ) {
                                     log::warn!("Sync Claude Token failed: {e}");
                                 } else {
-                                    log::info!(
-                                        "Sync Claude Token  (provider: {provider_id})"
-                                    );
+                                    log::info!("Sync Claude Token  (provider: {provider_id})");
                                 }
                             }
                         }
@@ -942,9 +935,7 @@ impl ProxyService {
                             ) {
                                 log::warn!("Sync Gemini Token failed: {e}");
                             } else {
-                                log::info!(
-                                    "Sync Gemini Token  (provider: {provider_id})"
-                                );
+                                log::info!("Sync Gemini Token  (provider: {provider_id})");
                             }
                         }
                     }
@@ -978,10 +969,7 @@ impl ProxyService {
 
     pub async fn stop(&self) -> Result<(), String> {
         if let Some(server) = self.server.write().await.take() {
-            server
-                .stop()
-                .await
-                .map_err(|e| format!("failed: {e}"))?;
+            server.stop().await.map_err(|e| format!("failed: {e}"))?;
 
             let mut global_config = self
                 .db
@@ -1124,9 +1112,7 @@ impl ProxyService {
         };
 
         if Self::live_has_proxy_placeholder_for_app(app_type, &config) {
-            log::warn!(
-                "{app_type_str} Live Configure;  stop  SSOT  Live"
-            );
+            log::warn!("{app_type_str} Live Configure;  stop  SSOT  Live");
             return Ok(());
         }
 
@@ -1462,9 +1448,7 @@ impl ProxyService {
                 .map_err(|e| format!("failed to parse {app_type_str} backup: {e}"))?;
 
             if Self::live_has_proxy_placeholder_for_app(app_type, &config) {
-                log::warn!(
-                    "{app_type_str}  SSOT  Live"
-                );
+                log::warn!("{app_type_str}  SSOT  Live");
             } else {
                 self.write_live_config_for_app(app_type, &config)?;
                 log::info!("{app_type_str} Live Configure");
@@ -1482,14 +1466,10 @@ impl ProxyService {
                 return Ok(());
             }
             Ok(false) => {
-                log::warn!(
-                    "{app_type_str} Live  SSOT "
-                );
+                log::warn!("{app_type_str} Live  SSOT ");
             }
             Err(e) => {
-                log::error!(
-                    "{app_type_str} Live SSOT failed: {e}"
-                );
+                log::error!("{app_type_str} Live SSOT failed: {e}");
             }
         }
 
@@ -1544,9 +1524,7 @@ impl ProxyService {
         };
 
         if Self::live_has_proxy_placeholder_for_app(app_type, &provider.settings_config) {
-            log::warn!(
-                "{app_type:?} Configure SSOT "
-            );
+            log::warn!("{app_type:?} Configure SSOT ");
             return Ok(false);
         }
 
@@ -1865,8 +1843,7 @@ impl ProxyService {
         app_type: &str,
         provider: &Provider,
     ) -> Result<(), String> {
-        let app_type_enum =
-            AppType::from_str(app_type).map_err(|_| format!(": {app_type}"))?;
+        let app_type_enum = AppType::from_str(app_type).map_err(|_| format!(": {app_type}"))?;
         let mut effective_settings =
             build_effective_settings_with_common_config(self.db.as_ref(), &app_type_enum, provider)
                 .map_err(|e| format!(" {app_type} Configurefailed: {e}"))?;
@@ -1948,10 +1925,7 @@ impl ProxyService {
 
         // Defense-in-depth: block official providers during proxy takeover
         if provider.category.as_deref() == Some("official") {
-            return Err(
-                " (Cannot switch to official provider during proxy takeover)"
-                    .to_string(),
-            );
+            return Err(" (Cannot switch to official provider during proxy takeover)".to_string());
         }
 
         let logical_target_changed =
@@ -2134,7 +2108,6 @@ impl ProxyService {
         }
         Ok(())
     }
-
 
     fn update_toml_base_url(toml_str: &str, new_url: &str) -> String {
         crate::codex_config::update_codex_toml_field(toml_str, "base_url", new_url)
@@ -2378,7 +2351,6 @@ impl ProxyService {
         Ok(())
     }
 
-
     pub async fn get_status(&self) -> Result<ProxyStatus, String> {
         if let Some(server) = self.server.read().await.as_ref() {
             Ok(server.get_status().await)
@@ -2422,10 +2394,7 @@ impl ProxyService {
 
         if require_restart {
             if let Some(server) = server_guard.take() {
-                server
-                    .stop()
-                    .await
-                    .map_err(|e| format!("failed: {e}"))?;
+                server.stop().await.map_err(|e| format!("failed: {e}"))?;
             }
 
             let app_handle = self.app_handle.read().await.clone();

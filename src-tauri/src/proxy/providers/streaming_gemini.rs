@@ -887,7 +887,9 @@ mod tests {
         });
 
         assert!(output.contains("git-commit"));
-        assert!(output.contains("Detail analysis content, write commit message, submit code in parts"));
+        assert!(
+            output.contains("Detail analysis content, write commit message, submit code in parts")
+        );
         assert!(!output.contains("\\\"parameters\\\""));
     }
 

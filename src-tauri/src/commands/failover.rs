@@ -84,7 +84,9 @@ pub async fn set_auto_failover_enabled(
         .map_err(|e| e.to_string())?;
 
     if enabled && !config.enabled {
-        return Err("Need to enable proxy takeover for this app first, then enable failover".to_string());
+        return Err(
+            "Need to enable proxy takeover for this app first, then enable failover".to_string(),
+        );
     }
 
     let mut auto_added_provider_id: Option<String> = None;

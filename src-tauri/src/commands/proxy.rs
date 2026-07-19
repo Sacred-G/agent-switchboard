@@ -21,9 +21,7 @@ pub async fn stop_proxy_server(state: tauri::State<'_, AppState>) -> Result<(), 
         || takeover.opencode
         || takeover.openclaw
     {
-        return Err(
-            "Turn off。".to_string(),
-        );
+        return Err("Turn off。".to_string());
     }
 
     state.proxy_service.stop().await
@@ -261,10 +259,7 @@ pub async fn switch_proxy_provider(
         .map_err(|e| format!("failed to read provider: {e}"))?
         .ok_or_else(|| format!(": {provider_id}"))?;
     if provider.category.as_deref() == Some("official") {
-        return Err(
-            " (Cannot switch to official provider during proxy takeover)"
-                .to_string(),
-        );
+        return Err(" (Cannot switch to official provider during proxy takeover)".to_string());
     }
 
     state
@@ -272,7 +267,6 @@ pub async fn switch_proxy_provider(
         .switch_proxy_target(&app_type, &provider_id)
         .await
 }
-
 
 #[tauri::command]
 pub async fn get_provider_health(
@@ -334,9 +328,7 @@ pub async fn reset_circuit_breaker(
 
             if let (Some(restored), Some(current)) = (restored_order, current_order) {
                 if restored < current {
-                    log::info!(
-                        "[Recovery]  {provider_id}  (P{restored} vs P{current})"
-                    );
+                    log::info!("[Recovery]  {provider_id}  (P{restored} vs P{current})");
 
                     let provider_name = db
                         .get_all_providers(&app_type)

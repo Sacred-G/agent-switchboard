@@ -1076,9 +1076,7 @@ pub fn inject_codex_unified_session_bucket(config_text: &str) -> Result<String, 
         .and_then(|item| item.as_table())
         .is_some_and(|table| !table_matches_codex_unified_official_provider(table));
     if existing_custom_conflicts {
-        log::warn!(
-            " Codex ConfigureCustom [model_providers.custom]"
-        );
+        log::warn!(" Codex ConfigureCustom [model_providers.custom]");
         return Ok(config_text.to_string());
     }
 
@@ -2327,8 +2325,9 @@ model = "glm-5"
 "#;
         // Simulate a WSL UNC path as agent-switchboard would see it on Windows;
         // the function now writes just the relative filename.
-        let unc_path =
-            Path::new(r"\\wsl.localhost\Ubuntu\home\user\.codex\agent-switchboard-model-catalog.json");
+        let unc_path = Path::new(
+            r"\\wsl.localhost\Ubuntu\home\user\.codex\agent-switchboard-model-catalog.json",
+        );
 
         let result = set_codex_model_catalog_json_field(input, Some(unc_path)).unwrap();
         let parsed: toml::Value = toml::from_str(&result).unwrap();
@@ -2392,7 +2391,8 @@ model = "glm-5"
         let config_text = r#"model_provider = "custom"
 model_catalog_json = "agent-switchboard-model-catalog.json"
 "#;
-        let generated_path = PathBuf::from("/home/user/.codex/agent-switchboard-model-catalog.json");
+        let generated_path =
+            PathBuf::from("/home/user/.codex/agent-switchboard-model-catalog.json");
         let result = resolve_cc_switch_catalog_path(config_text, &generated_path);
         assert_eq!(
             result,
@@ -2405,7 +2405,8 @@ model_catalog_json = "agent-switchboard-model-catalog.json"
     fn resolve_catalog_ignores_user_owned_relative() {
         let config_text = r#"model_catalog_json = "my-custom-catalog.json"
 "#;
-        let generated_path = PathBuf::from("/home/user/.codex/agent-switchboard-model-catalog.json");
+        let generated_path =
+            PathBuf::from("/home/user/.codex/agent-switchboard-model-catalog.json");
         let result = resolve_cc_switch_catalog_path(config_text, &generated_path);
         assert_eq!(
             result, None,

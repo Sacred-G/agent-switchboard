@@ -3,7 +3,6 @@
 use crate::provider::{UsageData, UsageResult};
 use std::time::Duration;
 
-
 enum BalanceProvider {
     DeepSeek,
     StepFun,
@@ -367,14 +366,12 @@ async fn query_novita(api_key: &str) -> UsageResult {
     }
 }
 
-
 fn parse_f64_field(obj: &serde_json::Value, field: &str) -> Option<f64> {
     obj.get(field).and_then(|v| {
         v.as_f64()
             .or_else(|| v.as_str().and_then(|s| s.parse().ok()))
     })
 }
-
 
 pub async fn get_balance(base_url: &str, api_key: &str) -> Result<UsageResult, String> {
     if api_key.trim().is_empty() {

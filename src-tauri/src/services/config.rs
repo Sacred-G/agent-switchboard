@@ -106,9 +106,7 @@ impl ConfigService {
             let provider = match manager.providers.get(&current_id) {
                 Some(provider) => provider.clone(),
                 None => {
-                    log::warn!(
-                        " {app_type:?}  {current_id}  live Sync"
-                    );
+                    log::warn!(" {app_type:?}  {current_id}  live Sync");
                     return Ok(());
                 }
             };
@@ -143,9 +141,10 @@ impl ConfigService {
         provider_id: &str,
         provider: &Provider,
     ) -> Result<(), AppError> {
-        let settings = provider.settings_config.as_object().ok_or_else(|| {
-            AppError::Config(format!(" {provider_id}  Codex Configuremust be"))
-        })?;
+        let settings = provider
+            .settings_config
+            .as_object()
+            .ok_or_else(|| AppError::Config(format!(" {provider_id}  Codex Configuremust be")))?;
         let auth = settings.get("auth").ok_or_else(|| {
             AppError::Config(format!(" {provider_id}  Codex ConfigureMissing auth "))
         })?;

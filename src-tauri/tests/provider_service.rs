@@ -1901,18 +1901,15 @@ fn provider_service_delete_current_provider_returns_error() {
         .expect_err("deleting current provider should fail");
     match err {
         AppError::Localized { zh, .. } => assert!(
-            zh.contains("")
-                || zh.contains(""),
+            zh.contains("") || zh.contains(""),
             "unexpected message: {zh}"
         ),
         AppError::Config(msg) => assert!(
-            msg.contains("")
-                || msg.contains(""),
+            msg.contains("") || msg.contains(""),
             "unexpected message: {msg}"
         ),
         AppError::Message(msg) => assert!(
-            msg.contains("")
-                || msg.contains(""),
+            msg.contains("") || msg.contains(""),
             "unexpected message: {msg}"
         ),
         other => panic!("expected Config/Message error, got {other:?}"),

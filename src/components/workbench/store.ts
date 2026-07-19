@@ -260,4 +260,11 @@ export const workbenchStore = {
   focus(id: string) {
     handles.get(id)?.term.focus();
   },
+
+  async writeInput(id: string, text: string): Promise<void> {
+    const session = sessions.find((item) => item.id === id);
+    if (!session || session.status !== "running" || !text) return;
+    await terminalApi.write(id, text);
+    handles.get(id)?.term.focus();
+  },
 };

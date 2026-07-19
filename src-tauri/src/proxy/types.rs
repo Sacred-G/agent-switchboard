@@ -298,22 +298,10 @@ mod tests {
     fn test_rectifier_config_default_enabled() {
         let config = RectifierConfig::default();
         assert!(config.enabled, " true");
-        assert!(
-            config.request_thinking_signature,
-            "thinking  true"
-        );
-        assert!(
-            config.request_thinking_budget,
-            "thinking budget  true"
-        );
-        assert!(
-            config.request_media_fallback,
-            "media Degraded true"
-        );
-        assert!(
-            config.request_media_heuristic,
-            " text-only  true"
-        );
+        assert!(config.request_thinking_signature, "thinking  true");
+        assert!(config.request_thinking_budget, "thinking budget  true");
+        assert!(config.request_media_fallback, "media Degraded true");
+        assert!(config.request_media_heuristic, " text-only  true");
     }
 
     #[test]
@@ -323,10 +311,7 @@ mod tests {
         assert!(config.enabled);
         assert!(config.request_thinking_signature);
         assert!(config.request_thinking_budget);
-        assert!(
-            config.request_media_fallback,
-            " requestMediaFallback  true"
-        );
+        assert!(config.request_media_fallback, " requestMediaFallback  true");
         assert!(
             config.request_media_heuristic,
             " requestMediaHeuristic  true"

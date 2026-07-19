@@ -42,8 +42,9 @@ pub fn import_from_codex(config: &mut MultiAppConfig) -> Result<usize, AppError>
         return Ok(0);
     }
 
-    let root: toml::Table = toml::from_str(&text)
-        .map_err(|e| AppError::McpValidation(format!("failed to parse ~/.codex/config.toml: {e}")))?;
+    let root: toml::Table = toml::from_str(&text).map_err(|e| {
+        AppError::McpValidation(format!("failed to parse ~/.codex/config.toml: {e}"))
+    })?;
 
     let servers = config.mcp.servers.get_or_insert_with(HashMap::new);
 

@@ -166,8 +166,8 @@ fn sync_single_file(db: &Database, file_path: &Path) -> Result<(u32, u32), AppEr
         return Ok((0, 0));
     }
 
-    let file =
-        fs::File::open(file_path).map_err(|e| AppError::Config(format!("failed to open file: {e}")))?;
+    let file = fs::File::open(file_path)
+        .map_err(|e| AppError::Config(format!("failed to open file: {e}")))?;
     let reader = BufReader::new(file);
 
     let mut line_offset: i64 = 0;
@@ -259,8 +259,7 @@ fn sync_single_file(db: &Database, file_path: &Path) -> Result<(u32, u32), AppEr
             Some(existing) => {
                 if parsed.stop_reason.is_some() && existing.stop_reason.is_none() {
                     true
-                }
-                else if parsed.stop_reason.is_some() == existing.stop_reason.is_some() {
+                } else if parsed.stop_reason.is_some() == existing.stop_reason.is_some() {
                     parsed.output_tokens > existing.output_tokens
                 } else {
                     false
@@ -637,7 +636,8 @@ mod tests {
 
     #[test]
     fn test_collect_jsonl_files_includes_subagents() {
-        let tmp = std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
+        let tmp =
+            std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
         let project = tmp.join("project");
         let session_dir = project.join("test-session");
         let subagents_dir = session_dir.join("subagents");
@@ -660,7 +660,8 @@ mod tests {
 
     #[test]
     fn test_collect_jsonl_files_includes_workflow_subagents() {
-        let tmp = std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
+        let tmp =
+            std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
         let project = tmp.join("project");
         let session_dir = project.join("test-session");
         let subagents_dir = session_dir.join("subagents");
@@ -692,7 +693,8 @@ mod tests {
     #[test]
     fn test_sync_imports_billable_message_without_stop_reason() -> Result<(), AppError> {
         let db = Database::memory()?;
-        let tmp = std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
+        let tmp =
+            std::env::temp_dir().join(format!("agent-switchboard-test-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&tmp).unwrap();
         let file = tmp.join("agent-wf.jsonl");
 
@@ -701,10 +703,7 @@ mod tests {
         fs::write(&file, format!("{billable}\n{empty}\n")).unwrap();
 
         let (imported, _skipped) = sync_single_file(&db, &file)?;
-        assert_eq!(
-            imported, 1,
-            " cache  stop_reason  message "
-        );
+        assert_eq!(imported, 1, " cache  stop_reason  message ");
 
         let conn = lock_conn!(db.conn);
         let cache_read: i64 = conn.query_row(

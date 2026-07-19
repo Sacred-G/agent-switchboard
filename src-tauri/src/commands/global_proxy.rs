@@ -159,8 +159,8 @@ pub struct DetectedProxy {
 }
 
 const PROXY_PORTS: &[(u16, &str, bool)] = &[
-    (7890, "http", true),     // Clash (mixed mode)
-    (7891, "socks5", false),  // Clash SOCKS only
+    (7890, "http", true),    // Clash (mixed mode)
+    (7891, "socks5", false), // Clash SOCKS only
     (1080, "socks5", false),
     (8080, "http", false),
     (8888, "http", false),    // Charles/Fiddler

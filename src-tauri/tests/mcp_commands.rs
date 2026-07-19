@@ -259,8 +259,7 @@ fn import_mcp_from_claude_invalid_json_preserves_state() {
     let _home = ensure_test_home();
 
     let mcp_path = get_claude_mcp_path();
-    fs::write(&mcp_path, "{\"mcpServers\":")
-        .expect("seed invalid ~/.claude.json");
+    fs::write(&mcp_path, "{\"mcpServers\":").expect("seed invalid ~/.claude.json");
 
     let state = create_test_state().expect("create test state");
 

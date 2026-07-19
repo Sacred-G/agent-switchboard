@@ -52,8 +52,7 @@ fn wrap_command_for_windows(obj: &mut Map<String, Value>) {
 }
 
 #[cfg(not(windows))]
-fn wrap_command_for_windows(_obj: &mut Map<String, Value>) {
-}
+fn wrap_command_for_windows(_obj: &mut Map<String, Value>) {}
 
 #[cfg(windows)]
 fn is_wsl_path(path: &Path) -> bool {
@@ -179,7 +178,9 @@ pub fn clear_has_completed_onboarding() -> Result<bool, AppError> {
 
 pub fn upsert_mcp_server(id: &str, spec: Value) -> Result<bool, AppError> {
     if id.trim().is_empty() {
-        return Err(AppError::InvalidInput("MCP server ID cannot be empty".into()));
+        return Err(AppError::InvalidInput(
+            "MCP server ID cannot be empty".into(),
+        ));
     }
     if !spec.is_object() {
         return Err(AppError::McpValidation(
@@ -247,7 +248,9 @@ pub fn upsert_mcp_server(id: &str, spec: Value) -> Result<bool, AppError> {
 
 pub fn delete_mcp_server(id: &str) -> Result<bool, AppError> {
     if id.trim().is_empty() {
-        return Err(AppError::InvalidInput("MCP server ID cannot be empty".into()));
+        return Err(AppError::InvalidInput(
+            "MCP server ID cannot be empty".into(),
+        ));
     }
     let path = user_config_path();
     if !path.exists() {

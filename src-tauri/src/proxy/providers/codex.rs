@@ -500,7 +500,6 @@ impl ProviderAdapter for CodexAdapter {
         let base_trimmed = base_url.trim_end_matches('/');
         let endpoint_trimmed = endpoint.trim_start_matches('/');
 
-
         let already_has_v1 = base_trimmed.ends_with("/v1");
         let origin_only = is_origin_only_url(base_trimmed);
 

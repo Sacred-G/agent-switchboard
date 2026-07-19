@@ -176,8 +176,7 @@ mod tests {
 
     #[test]
     fn test_masked_access_token_utf8_safe() {
-        let auth =
-            AuthInfo::with_access_token("refresh".to_string(), "⚠️1234567890".to_string());
+        let auth = AuthInfo::with_access_token("refresh".to_string(), "⚠️1234567890".to_string());
         let masked = auth.masked_access_token().unwrap();
         assert!(!masked.is_empty());
     }

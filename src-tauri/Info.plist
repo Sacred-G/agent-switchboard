@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Agent Switchboard uses the microphone to dictate text into workbench terminals.</string>
+  <key>NSSpeechRecognitionUsageDescription</key>
+  <string>Agent Switchboard uses speech recognition to convert dictated audio into terminal input.</string>
   <!-- Register agent-switchboard:// custom URL protocol for deep link import -->
   <key>CFBundleURLTypes</key>
   <array>
@@ -16,4 +20,3 @@
   </array>
 </dict>
 </plist>
-

@@ -19,7 +19,7 @@ use crate::proxy::providers::{get_adapter, ClaudeAdapter, ProviderAdapter};
 pub enum HealthStatus {
     Operational,
     Degraded,
-    failed,
+    Failed,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -97,7 +97,7 @@ impl StreamCheckService {
         }
 
         Ok(last_result.unwrap_or_else(|| StreamCheckResult {
-            status: HealthStatus::failed,
+            status: HealthStatus::Failed,
             success: false,
             message: "Check failed".to_string(),
             response_time_ms: None,
@@ -218,7 +218,7 @@ impl StreamCheckService {
                 error_category: None,
             },
             Err(e) => StreamCheckResult {
-                status: HealthStatus::failed,
+                status: HealthStatus::Failed,
                 success: false,
                 message: e.to_string(),
                 response_time_ms: Some(response_time),
@@ -260,7 +260,6 @@ impl StreamCheckService {
             .as_ref()
             .and_then(|meta| meta.custom_user_agent_header().ok().flatten())
     }
-
 
     fn extract_openclaw_base_url(provider: &Provider) -> Result<String, AppError> {
         provider
@@ -408,7 +407,7 @@ mod tests {
             1500,
         );
         assert!(!r.success);
-        assert_eq!(r.status, HealthStatus::failed);
+        assert_eq!(r.status, HealthStatus::Failed);
         assert!(r.http_status.is_none());
     }
 

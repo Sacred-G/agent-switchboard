@@ -417,7 +417,14 @@ export interface UniversalProviderApps {
   claude: boolean;
   codex: boolean;
   gemini: boolean;
+  opencode: boolean;
 }
+
+export type UniversalProviderApiFormat =
+  | "openai_responses"
+  | "openai_chat"
+  | "anthropic"
+  | "gemini";
 
 export interface ClaudeModelConfig {
   model?: string;
@@ -439,12 +446,14 @@ export interface UniversalProviderModels {
   claude?: ClaudeModelConfig;
   codex?: CodexModelConfig;
   gemini?: GeminiModelConfig;
+  opencode?: GeminiModelConfig;
 }
 
 export interface UniversalProvider {
   id: string;
   name: string;
   providerType: string;
+  apiFormat: UniversalProviderApiFormat;
   apps: UniversalProviderApps;
   baseUrl: string;
   apiKey: string;

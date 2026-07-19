@@ -749,10 +749,9 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
             ));
         }
         AppType::Codex => {
-            let obj = provider
-                .settings_config
-                .as_object()
-                .ok_or_else(|| AppError::Config("Codex Configuremust be a JSON object".to_string()))?;
+            let obj = provider.settings_config.as_object().ok_or_else(|| {
+                AppError::Config("Codex Configuremust be a JSON object".to_string())
+            })?;
             let auth = obj
                 .get("auth")
                 .ok_or_else(|| AppError::Config("Codex ConfigureMissing 'auth' ".to_string()))?;

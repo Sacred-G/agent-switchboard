@@ -527,7 +527,8 @@ fn test_build_claude_provider_without_config_unchanged() {
 #[serial_test::serial]
 fn test_import_prompt_allows_space_in_base64_content() {
     let _test_home = TestHomeGuard::new();
-    let url = "agent-switchboard://v1/import?resource=prompt&app=codex&name=PromptPlus&content=Pj4+";
+    let url =
+        "agent-switchboard://v1/import?resource=prompt&app=codex&name=PromptPlus&content=Pj4+";
     let request = parse_deeplink_url(url).unwrap();
 
     // URL decoded content may have "+" become space
@@ -601,7 +602,8 @@ fn test_parse_mcp_deeplink() {
 
 #[test]
 fn test_parse_skill_deeplink() {
-    let url = "agent-switchboard://v1/import?resource=skill&repo=owner/repo&directory=skills&branch=dev";
+    let url =
+        "agent-switchboard://v1/import?resource=skill&repo=owner/repo&directory=skills&branch=dev";
     let request = parse_deeplink_url(url).unwrap();
 
     assert_eq!(request.resource, "skill");

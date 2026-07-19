@@ -475,7 +475,10 @@ mod tests {
         .expect("write");
 
         let meta = parse_session(&path).unwrap();
-        assert_eq!(meta.title.as_deref(), Some("Please help me refactor this function"));
+        assert_eq!(
+            meta.title.as_deref(),
+            Some("Please help me refactor this function")
+        );
     }
 
     #[test]

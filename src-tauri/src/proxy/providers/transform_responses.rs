@@ -96,7 +96,6 @@ pub fn anthropic_to_responses(
         }
     }
 
-
     if let Some(tools) = body.get("tools").and_then(|t| t.as_array()) {
         let response_tools: Vec<Value> = tools
             .iter()
@@ -433,8 +432,7 @@ fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyErro
                             }));
                         }
 
-                        "thinking" => {
-                        }
+                        "thinking" => {}
 
                         _ => {}
                     }
@@ -1245,7 +1243,6 @@ mod tests {
         assert!(result.get("reasoning").is_none());
     }
 
-
     #[test]
     fn test_anthropic_to_responses_codex_oauth_sets_store_and_include() {
         let input = json!({
@@ -1349,7 +1346,6 @@ mod tests {
         assert_eq!(result["max_output_tokens"], json!(1024));
     }
 
-
     #[test]
     fn test_codex_oauth_strips_temperature() {
         let input = json!({
@@ -1378,10 +1374,7 @@ mod tests {
 
         let result = anthropic_to_responses(input, None, true, true).unwrap();
 
-        assert!(
-            result.get("top_p").is_none(),
-            "Codex OAuth  top_p"
-        );
+        assert!(result.get("top_p").is_none(), "Codex OAuth  top_p");
     }
 
     #[test]
@@ -1394,11 +1387,7 @@ mod tests {
 
         let result = anthropic_to_responses(input, None, true, true).unwrap();
 
-        assert_eq!(
-            result["instructions"],
-            json!(""),
-            "instructions "
-        );
+        assert_eq!(result["instructions"], json!(""), "instructions ");
         assert_eq!(result["tools"], json!([]), "tools ");
         assert_eq!(
             result["parallel_tool_calls"],
@@ -1449,11 +1438,7 @@ mod tests {
 
         let result = anthropic_to_responses(input, None, true, true).unwrap();
 
-        assert_eq!(
-            result["stream"],
-            json!(true),
-            "Codex OAuth  stream  true"
-        );
+        assert_eq!(result["stream"], json!(true), "Codex OAuth  stream  true");
     }
 
     #[test]
@@ -1486,18 +1471,12 @@ mod tests {
             result.get("parallel_tool_calls").is_none(),
             " Codex OAuth  parallel_tool_calls"
         );
-        assert!(
-            result.get("stream").is_none(),
-            " Codex OAuth  stream"
-        );
+        assert!(result.get("stream").is_none(), " Codex OAuth  stream");
         assert!(
             result.get("instructions").is_none(),
             " Codex OAuth  instructions "
         );
-        assert!(
-            result.get("tools").is_none(),
-            " Codex OAuth  tools "
-        );
+        assert!(result.get("tools").is_none(), " Codex OAuth  tools ");
     }
 
     // ==================== Usage Field Robustness Tests ====================

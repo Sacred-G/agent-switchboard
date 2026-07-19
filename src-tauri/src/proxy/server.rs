@@ -212,10 +212,7 @@ impl ProxyServer {
                     Err(ProxyError::Stopfailed(e.to_string()))
                 }
                 Err(_) => {
-                    log::warn!(
-                        "[{}] 5",
-                        log_srv::STOP_TIMEOUT
-                    );
+                    log::warn!("[{}] 5", log_srv::STOP_TIMEOUT);
                     Err(ProxyError::StopTimeout)
                 }
             }

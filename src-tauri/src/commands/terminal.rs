@@ -6,6 +6,7 @@
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
+use std::path::{Component, Path, PathBuf};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
@@ -24,6 +25,54 @@ use super::misc::{
 
 pub const TERMINAL_OUTPUT_EVENT: &str = "workbench-terminal-output";
 pub const TERMINAL_EXIT_EVENT: &str = "workbench-terminal-exit";
+
+fn validate_workspace_folder_name(folder_name: &str) -> Result<&str, String> {
+    let trimmed = folder_name.trim();
+    if trimmed.is_empty() {
+        return Err("workspace folder name cannot be empty".to_string());
+    }
+    if trimmed.len() > 120 {
+        return Err("workspace folder name cannot exceed 120 characters".to_string());
+    }
+    if trimmed.chars().any(|character| {
+        character.is_control()
+            || matches!(
+                character,
+                '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*'
+            )
+    }) || trimmed.ends_with('.')
+    {
+        return Err("workspace folder name contains unsupported characters".to_string());
+    }
+    let path = Path::new(trimmed);
+    let mut components = path.components();
+    if !matches!(components.next(), Some(Component::Normal(_))) || components.next().is_some() {
+        return Err("workspace folder name must be a single folder name".to_string());
+    }
+    Ok(trimmed)
+}
+
+#[tauri::command]
+pub async fn workbench_create_directory(
+    parent: String,
+    folderName: String,
+) -> Result<String, String> {
+    let parent_path = PathBuf::from(parent.trim());
+    if !parent_path.is_dir() {
+        return Err("selected parent directory does not exist".to_string());
+    }
+    let parent_path = parent_path
+        .canonicalize()
+        .map_err(|e| format!("failed to resolve parent directory: {e}"))?;
+    let folder_name = validate_workspace_folder_name(&folderName)?;
+    let workspace_path = parent_path.join(folder_name);
+    if workspace_path.exists() {
+        return Err("a file or folder with this name already exists".to_string());
+    }
+    std::fs::create_dir(&workspace_path)
+        .map_err(|e| format!("failed to create workspace directory: {e}"))?;
+    Ok(workspace_path.to_string_lossy().into_owned())
+}
 
 struct PtySession {
     writer: Box<dyn Write + Send>,
@@ -116,6 +165,7 @@ fn build_command(command: Option<&str>) -> CommandBuilder {
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn workbench_create_terminal(
     app_handle: AppHandle,
     state: State<'_, crate::store::AppState>,
@@ -302,4 +352,47 @@ pub async fn workbench_list_terminals(
         .lock()
         .map_err(|_| "terminal registry poisoned".to_string())?;
     Ok(sessions.keys().cloned().collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{validate_workspace_folder_name, workbench_create_directory};
+    use std::path::Path;
+
+    #[test]
+    fn workspace_folder_name_accepts_single_component() {
+        assert_eq!(
+            validate_workspace_folder_name(" codex-workspace "),
+            Ok("codex-workspace")
+        );
+    }
+
+    #[test]
+    fn workspace_folder_name_rejects_traversal_and_nested_paths() {
+        for invalid in ["", ".", "..", "../escape", "nested/folder"] {
+            assert!(
+                validate_workspace_folder_name(invalid).is_err(),
+                "accepted invalid folder name: {invalid}"
+            );
+        }
+    }
+
+    #[test]
+    fn creates_workspace_inside_selected_parent_and_rejects_collision() {
+        let parent = tempfile::tempdir().expect("create temporary parent");
+        let parent_string = parent.path().to_string_lossy().into_owned();
+
+        let created = tauri::async_runtime::block_on(workbench_create_directory(
+            parent_string.clone(),
+            "generated-workspace".to_string(),
+        ))
+        .expect("create workspace");
+
+        assert!(Path::new(&created).is_dir());
+        assert!(tauri::async_runtime::block_on(workbench_create_directory(
+            parent_string,
+            "generated-workspace".to_string(),
+        ))
+        .is_err());
+    }
 }

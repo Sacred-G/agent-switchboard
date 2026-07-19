@@ -138,7 +138,5 @@ pub fn format_skill_error(
         "suggestion": suggestion,
     });
 
-    serde_json::to_string(&error_obj).unwrap_or_else(|_| {
-        format!("ERROR:{code}")
-    })
+    serde_json::to_string(&error_obj).unwrap_or_else(|_| format!("ERROR:{code}"))
 }

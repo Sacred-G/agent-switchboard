@@ -121,8 +121,8 @@ fn sync_single_gemini_file(db: &Database, file_path: &Path) -> Result<(u32, u32)
         return Ok((0, 0));
     }
 
-    let content = fs::read_to_string(file_path)
-        .map_err(|e| AppError::Config(format!("Read: {e}")))?;
+    let content =
+        fs::read_to_string(file_path).map_err(|e| AppError::Config(format!("Read: {e}")))?;
     let value: serde_json::Value = serde_json::from_str(&content)
         .map_err(|e| AppError::Config(format!("JSON parsing failed: {e}")))?;
 

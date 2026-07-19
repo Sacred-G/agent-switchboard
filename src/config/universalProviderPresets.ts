@@ -10,6 +10,8 @@ export interface UniversalProviderPreset {
 
   providerType: string;
 
+  apiFormat: UniversalProvider["apiFormat"];
+
   defaultApps: UniversalProviderApps;
 
   defaultModels: UniversalProviderModels;
@@ -39,16 +41,21 @@ const NEWAPI_DEFAULT_MODELS: UniversalProviderModels = {
   gemini: {
     model: "gemini-3.5-flash",
   },
+  opencode: {
+    model: "gpt-5.5",
+  },
 };
 
 export const universalProviderPresets: UniversalProviderPreset[] = [
   {
     name: "NewAPI",
     providerType: "newapi",
+    apiFormat: "openai_responses",
     defaultApps: {
       claude: true,
       codex: true,
       gemini: true,
+      opencode: true,
     },
     defaultModels: NEWAPI_DEFAULT_MODELS,
     websiteUrl: "https://www.newapi.pro",
@@ -60,16 +67,37 @@ export const universalProviderPresets: UniversalProviderPreset[] = [
   {
     name: "Custom Gateway",
     providerType: "custom_gateway",
+    apiFormat: "openai_chat",
     defaultApps: {
       claude: true,
       codex: true,
       gemini: true,
+      opencode: true,
     },
     defaultModels: NEWAPI_DEFAULT_MODELS,
     icon: "openai",
     iconColor: "#6366F1",
     description: "Custom configured API Gateway",
     isCustomTemplate: true,
+  },
+  {
+    name: "OpenRouter",
+    providerType: "openrouter",
+    apiFormat: "openai_chat",
+    defaultApps: {
+      claude: false,
+      codex: true,
+      gemini: false,
+      opencode: true,
+    },
+    defaultModels: {
+      codex: { model: "openai/gpt-5.5", reasoningEffort: "high" },
+      opencode: { model: "anthropic/claude-sonnet-4.6" },
+    },
+    websiteUrl: "https://openrouter.ai",
+    icon: "openrouter",
+    iconColor: "#6566F1",
+    description: "OpenRouter's OpenAI-compatible API for Codex and OpenCode.",
   },
 ];
 
@@ -84,6 +112,7 @@ export function createUniversalProviderFromPreset(
     id,
     name: customName || preset.name,
     providerType: preset.providerType,
+    apiFormat: preset.apiFormat,
     apps: { ...preset.defaultApps },
     baseUrl,
     apiKey,

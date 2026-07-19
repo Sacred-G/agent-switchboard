@@ -18,7 +18,6 @@ fn parse_app_type(app: &str) -> Result<AppType, String> {
     AppType::from_str(app).map_err(|e| e.to_string())
 }
 
-
 #[tauri::command]
 pub fn get_installed_skills(app_state: State<'_, AppState>) -> Result<Vec<InstalledSkill>, String> {
     SkillService::get_all_installed(&app_state.db).map_err(|e| e.to_string())
@@ -98,7 +97,6 @@ pub fn import_skills_from_apps(
     SkillService::import_from_apps(&app_state.db, imports).map_err(|e| e.to_string())
 }
 
-
 #[tauri::command]
 pub async fn discover_available_skills(
     service: State<'_, SkillServiceState>,
@@ -155,7 +153,6 @@ pub async fn search_skills_sh(
         .await
         .map_err(|e| e.to_string())
 }
-
 
 #[tauri::command]
 pub async fn get_skills(
@@ -257,7 +254,6 @@ pub fn uninstall_skill_for_app(
 
     SkillService::uninstall(&app_state.db, &skill.id).map_err(|e| e.to_string())
 }
-
 
 #[tauri::command]
 pub fn get_skill_repos(app_state: State<'_, AppState>) -> Result<Vec<SkillRepo>, String> {

@@ -48,7 +48,6 @@ impl Database {
         Ok(())
     }
 
-
     pub fn get_config_snippet(&self, app_type: &str) -> Result<Option<String>, AppError> {
         self.get_setting(&format!("common_config_{app_type}"))
     }
@@ -118,7 +117,6 @@ impl Database {
         }
     }
 
-
     const GLOBAL_PROXY_URL_KEY: &'static str = "global_proxy_url";
 
     ///
@@ -144,7 +142,6 @@ impl Database {
         }
     }
 
-
     ///
     #[deprecated(since = "3.9.0", note = " get_proxy_config_for_app().enabled ")]
     pub fn get_proxy_takeover_enabled(&self, app_type: &str) -> Result<bool, AppError> {
@@ -156,10 +153,7 @@ impl Database {
     }
 
     ///
-    #[deprecated(
-        since = "3.9.0",
-        note = " update_proxy_config_for_app()  enabled "
-    )]
+    #[deprecated(since = "3.9.0", note = " update_proxy_config_for_app()  enabled ")]
     pub fn set_proxy_takeover_enabled(
         &self,
         app_type: &str,
@@ -185,10 +179,7 @@ impl Database {
     }
 
     ///
-    #[deprecated(
-        since = "3.9.0",
-        note = " update_proxy_config_for_app()  enabled "
-    )]
+    #[deprecated(since = "3.9.0", note = " update_proxy_config_for_app()  enabled ")]
     pub fn clear_all_proxy_takeover(&self) -> Result<(), AppError> {
         let conn = lock_conn!(self.conn);
         conn.execute(
@@ -199,7 +190,6 @@ impl Database {
         log::info!("");
         Ok(())
     }
-
 
     ///
     pub fn get_rectifier_config(&self) -> Result<crate::proxy::types::RectifierConfig, AppError> {
@@ -219,7 +209,6 @@ impl Database {
         self.set_setting("rectifier_config", &json)
     }
 
-
     ///
     pub fn get_optimizer_config(&self) -> Result<crate::proxy::types::OptimizerConfig, AppError> {
         match self.get_setting("optimizer_config")? {
@@ -237,7 +226,6 @@ impl Database {
             .map_err(|e| AppError::Database(format!("Configurefailed: {e}")))?;
         self.set_setting("optimizer_config", &json)
     }
-
 
     ///
     pub fn get_copilot_optimizer_config(
@@ -258,7 +246,6 @@ impl Database {
             .map_err(|e| AppError::Database(format!(" Copilot Configurefailed: {e}")))?;
         self.set_setting("copilot_optimizer_config", &json)
     }
-
 
     pub fn get_log_config(&self) -> Result<crate::proxy::types::LogConfig, AppError> {
         match self.get_setting("log_config")? {

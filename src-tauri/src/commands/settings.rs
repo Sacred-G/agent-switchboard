@@ -198,19 +198,15 @@ pub async fn install_update_and_restart(app: AppHandle) -> Result<bool, String> 
         crate::remove_tray_icon_before_exit(&app);
         crate::destroy_single_instance_lock(&app);
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-        update.install(bytes).map_err(|e| {
-            format!(
-                "Windows failed: {e}。Exit Live ; 。"
-            )
-        })?;
+        update
+            .install(bytes)
+            .map_err(|e| format!("Windows failed: {e}。Exit Live ; 。"))?;
         return Ok(true);
     }
 
     #[cfg(not(target_os = "windows"))]
     {
-        update
-            .install(bytes)
-            .map_err(|e| format!("failed: {e}"))?;
+        update.install(bytes).map_err(|e| format!("failed: {e}"))?;
 
         crate::save_window_state_before_exit(&app);
         crate::cleanup_before_exit(&app).await;

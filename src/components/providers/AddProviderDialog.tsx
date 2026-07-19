@@ -42,12 +42,9 @@ export function AddProviderDialog({
   onSubmit,
 }: AddProviderDialogProps) {
   const { t } = useTranslation();
-  // OpenCode and OpenClaw don't support universal providers
+  // OpenClaw, Hermes, and Claude Desktop use different provider models.
   const showUniversalTab =
-    appId !== "opencode" &&
-    appId !== "openclaw" &&
-    appId !== "hermes" &&
-    appId !== "claude-desktop";
+    appId !== "openclaw" && appId !== "hermes" && appId !== "claude-desktop";
   const [activeTab, setActiveTab] = useState<"app-specific" | "universal">(
     "app-specific",
   );

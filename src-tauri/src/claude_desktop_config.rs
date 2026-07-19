@@ -891,9 +891,7 @@ pub fn proxy_gateway_base_url_from_db(db: &Database) -> Result<String, AppError>
     // under a Mutex), so block_on cannot deadlock the calling thread.
     let config = futures::executor::block_on(db.get_proxy_config())?;
     if config.listen_port == 0 {
-        return Err(AppError::Config(
-            "Claude Desktop ; ".to_string(),
-        ));
+        return Err(AppError::Config("Claude Desktop ; ".to_string()));
     }
     Ok(format!(
         "{}{}",
@@ -1347,10 +1345,7 @@ mod tests {
 
         let err = proxy_gateway_base_url_from_db(&db)
             .expect_err("unresolved ephemeral port should not produce a :0 URL");
-        assert!(
-            err.to_string().contains(""),
-            "unexpected error: {err}"
-        );
+        assert!(err.to_string().contains(""), "unexpected error: {err}");
     }
 
     fn official_provider() -> Provider {
