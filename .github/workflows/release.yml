@@ -190,6 +190,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Skip entirely when no Apple certificate is configured (unsigned build)
+          if [ -z "${{ secrets.APPLE_CERTIFICATE }}" ]; then
+            echo "⚠️ APPLE_CERTIFICATE secret not set — producing unsigned macOS build"
+            exit 0
+          fi
           # Decode .p12 certificate from base64
           CERT_PATH="$RUNNER_TEMP/certificate.p12"
           printf '%s' "${{ secrets.APPLE_CERTIFICATE }}" | (base64 --decode 2>/dev/null || base64 -D) > "$CERT_PATH"
@@ -232,12 +237,22 @@ jobs:
         shell: bash
         timeout-minutes: 60
         env:
-          APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MAYBE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
+          MAYBE_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MAYBE_APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          MAYBE_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
+          # Only export Apple signing/notarization vars when actually configured;
+          # Tauri treats an empty-but-present variable as a signing request.
+          if [ -n "${MAYBE_SIGNING_IDENTITY:-}" ]; then
+            export APPLE_SIGNING_IDENTITY="$MAYBE_SIGNING_IDENTITY"
+          fi
+          if [ -n "${MAYBE_APPLE_ID:-}" ]; then
+            export APPLE_ID="$MAYBE_APPLE_ID"
+            export APPLE_PASSWORD="$MAYBE_APPLE_PASSWORD"
+            export APPLE_TEAM_ID="$MAYBE_APPLE_TEAM_ID"
+          fi
           max_attempts=3
           for attempt in $(seq 1 "$max_attempts"); do
             echo "=== macOS build/notarization attempt ${attempt}/${max_attempts} ==="
@@ -303,9 +318,14 @@ jobs:
             exit 1
           fi
 
-          # Staple notarization ticket to .app (Tauri already notarized it)
-          xcrun stapler staple "$APP_PATH"
-          echo "✅ .app stapled"
+          # Staple notarization ticket to .app (Tauri already notarized it).
+          # Skipped for unsigned builds (no Apple certificate configured).
+          if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            xcrun stapler staple "$APP_PATH"
+            echo "✅ .app stapled"
+          else
+            echo "⚠️ Unsigned build — skipping staple"
+          fi
 
           # 1) Collect .tar.gz (updater artifact)
           NEW_TAR_GZ="agent-switchboard-${VERSION}-macOS.tar.gz"
@@ -319,9 +339,11 @@ jobs:
           echo "macOS zip ready: $NEW_ZIP"
 
           # 3) Create styled DMG with create-dmg (Tauri's built-in DMG styling doesn't work on CI)
-          if [ -z "${APPLE_SIGNING_IDENTITY:-}" ]; then
-            echo "❌ APPLE_SIGNING_IDENTITY is missing before DMG creation" >&2
-            exit 1
+          CODESIGN_ARGS=()
+          if [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            CODESIGN_ARGS=(--codesign "$APPLE_SIGNING_IDENTITY")
+          else
+            echo "⚠️ No signing identity — creating unsigned DMG"
           fi
 
           HOMEBREW_NO_AUTO_UPDATE=1 brew install create-dmg
@@ -340,7 +362,7 @@ jobs:
             --icon "CC Switch.app" 180 220 \
             --hide-extension "CC Switch.app" \
             --app-drop-link 480 220 \
-            --codesign "$APPLE_SIGNING_IDENTITY" \
+            ${CODESIGN_ARGS[@]+"${CODESIGN_ARGS[@]}"} \
             --no-internet-enable \
             "release-assets/$NEW_DMG" \
             "$DMG_STAGE_DIR"
@@ -358,6 +380,11 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
+
+          if [ -z "${APPLE_ID:-}" ]; then
+            echo "⚠️ Apple notarization credentials not set — skipping DMG notarization"
+            exit 0
+          fi
 
           DMG_PATH=$(find release-assets -maxdepth 1 -name "*.dmg" -type f | head -1 || true)
           if [ -z "$DMG_PATH" ]; then
@@ -395,6 +422,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -z "${APPLE_SIGNING_IDENTITY:-}" ]; then
+            echo "⚠️ Unsigned build — skipping signing/notarization verification"
+            exit 0
+          fi
 
           # Verify .app (from Tauri bundle)
           APP_PATH=""
