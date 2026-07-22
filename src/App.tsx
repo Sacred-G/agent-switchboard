@@ -26,6 +26,8 @@ import {
   Cpu,
   LayoutDashboard,
   LayoutGrid,
+  Globe,
+  Code2,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Provider, VisibleApps } from "@/types";
@@ -100,6 +102,16 @@ const WorkbenchPage = lazy(() =>
     default: m.WorkbenchPage,
   })),
 );
+const WebBoardPage = lazy(() =>
+  import("@/components/webboard/WebBoardPage").then((m) => ({
+    default: m.WebBoardPage,
+  })),
+);
+const SketchPage = lazy(() =>
+  import("@/components/sketch/SketchPage").then((m) => ({
+    default: m.SketchPage,
+  })),
+);
 
 type View =
   | "providers"
@@ -113,6 +125,8 @@ type View =
   | "sessions"
   | "workspace"
   | "workbench"
+  | "webboard"
+  | "sketch"
   | "openclawEnv"
   | "openclawTools"
   | "openclawAgents"
@@ -159,6 +173,8 @@ const VALID_VIEWS: View[] = [
   "sessions",
   "workspace",
   "workbench",
+  "webboard",
+  "sketch",
   "openclawEnv",
   "openclawTools",
   "openclawAgents",
@@ -956,6 +972,18 @@ function App() {
               <WorkbenchPage />
             </Suspense>
           );
+        case "webboard":
+          return (
+            <Suspense fallback={null}>
+              <WebBoardPage />
+            </Suspense>
+          );
+        case "sketch":
+          return (
+            <Suspense fallback={null}>
+              <SketchPage />
+            </Suspense>
+          );
         case "openclawEnv":
           return <EnvPanel />;
         case "openclawTools":
@@ -1180,6 +1208,8 @@ function App() {
                   {currentView === "sessions" && t("sessionManager.title")}
                   {currentView === "workspace" && t("workspace.title")}
                   {currentView === "workbench" && t("workbench.title")}
+                  {currentView === "webboard" && t("webBoard.title")}
+                  {currentView === "sketch" && t("sketch.title")}
                   {currentView === "openclawEnv" && t("openclaw.env.title")}
                   {currentView === "openclawTools" && t("openclaw.tools.title")}
                   {currentView === "openclawAgents" &&
@@ -1224,6 +1254,24 @@ function App() {
                   className="hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <LayoutGrid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView("webboard")}
+                  title={t("webBoard.title")}
+                  className="hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <Globe className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView("sketch")}
+                  title={t("sketch.title")}
+                  className="hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <Code2 className="w-4 h-4" />
                 </Button>
                 <UpdateBadge
                   onClick={() => {

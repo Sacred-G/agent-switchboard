@@ -74,6 +74,56 @@ pub async fn workbench_create_directory(
     Ok(workspace_path.to_string_lossy().into_owned())
 }
 
+/// Write an HTML sketch to a throwaway temp file and open it in the user's
+/// default browser. Returns the file path that was opened.
+#[tauri::command]
+pub async fn workbench_open_html_in_browser(
+    app_handle: AppHandle,
+    html: String,
+) -> Result<String, String> {
+    use tauri_plugin_opener::OpenerExt;
+
+    let file_name = format!("agent-switchboard-sketch-{}.html", uuid_like());
+    let path = std::env::temp_dir().join(file_name);
+    std::fs::write(&path, html.as_bytes())
+        .map_err(|e| format!("failed to write sketch file: {e}"))?;
+    app_handle
+        .opener()
+        .open_path(path.to_string_lossy().to_string(), None::<String>)
+        .map_err(|e| format!("failed to open sketch in browser: {e}"))?;
+    Ok(path.to_string_lossy().into_owned())
+}
+
+/// Save an HTML sketch to a user-selected path (chosen via the frontend save
+/// dialog). The path's parent must already exist.
+#[tauri::command]
+pub async fn workbench_save_html(path: String, html: String) -> Result<String, String> {
+    let target = PathBuf::from(path.trim());
+    if target.as_os_str().is_empty() {
+        return Err("no destination path was provided".to_string());
+    }
+    if let Some(parent) = target.parent() {
+        if !parent.as_os_str().is_empty() && !parent.is_dir() {
+            return Err("the destination folder does not exist".to_string());
+        }
+    }
+    std::fs::write(&target, html.as_bytes())
+        .map_err(|e| format!("failed to save file: {e}"))?;
+    Ok(target.to_string_lossy().into_owned())
+}
+
+/// Cheap unique-ish token for temp file names without pulling extra crates
+/// into this module's signature (uuid is a workspace dep but this keeps the
+/// temp path collision-safe enough within a process).
+fn uuid_like() -> String {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    format!("{}-{}", std::process::id(), nanos)
+}
+
 struct PtySession {
     writer: Box<dyn Write + Send>,
     master: Box<dyn MasterPty + Send>,

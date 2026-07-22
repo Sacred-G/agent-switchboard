@@ -297,6 +297,7 @@ pub fn run() {
         })
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(
@@ -1401,10 +1402,28 @@ pub fn run() {
             commands::is_lightweight_mode,
             commands::workbench_create_terminal,
             commands::workbench_create_directory,
+            commands::workbench_open_html_in_browser,
+            commands::workbench_save_html,
             commands::workbench_write_terminal,
             commands::workbench_resize_terminal,
             commands::workbench_close_terminal,
             commands::workbench_list_terminals,
+            commands::list_workbench_workspaces,
+            commands::get_workbench_workspace,
+            commands::save_workbench_workspace,
+            commands::touch_workbench_workspace,
+            commands::delete_workbench_workspace,
+            commands::export_workbench_workspace,
+            commands::import_workbench_workspace,
+            commands::create_workbench_worktree,
+            commands::remove_workbench_worktree,
+            commands::detect_workbench_project_commands,
+            commands::get_workbench_worktree_status,
+            commands::get_workbench_worktree_diff,
+            commands::commit_workbench_worktree,
+            commands::discard_workbench_worktree_changes,
+            commands::migrate_workbench_worktree_changes,
+            commands::merge_workbench_worktree,
         ]);
 
     let app = builder

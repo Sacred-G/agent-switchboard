@@ -13,6 +13,20 @@ export { openclawApi } from "./openclaw";
 export { sessionsApi } from "./sessions";
 export { workspaceApi } from "./workspace";
 export { terminalApi, decodeTerminalChunk } from "./terminal";
+export { workbenchApi } from "./workbench";
+export type {
+  PersistedWorkbenchPanel,
+  WorkbenchActivity,
+  WorkbenchCommandRecord,
+  WorkbenchGitStatus,
+  WorkbenchLayoutPreset,
+  WorkbenchPanelView,
+  WorkbenchProjectCommand,
+  WorkbenchWorktree,
+  WorkbenchWorkspaceDocument,
+  WorkbenchWorkspaceExport,
+  WorkbenchWorkspaceRecord,
+} from "./workbench";
 export * as configApi from "./config";
 export * as authApi from "./auth";
 export * as copilotApi from "./copilot";

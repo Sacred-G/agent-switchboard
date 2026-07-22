@@ -177,6 +177,101 @@ fn schema_migration_rejects_future_version() {
 }
 
 #[test]
+fn migration_v11_to_v12_adds_durable_workbench_workspaces() {
+    let conn = Connection::open_in_memory().expect("open memory db");
+    Database::create_tables_on_conn(&conn).expect("create tables");
+    conn.execute("DROP TABLE workbench_workspaces", [])
+        .expect("simulate v11 database");
+    Database::set_user_version(&conn, 11).expect("set user_version=11");
+
+    Database::apply_schema_migrations_on_conn(&conn).expect("apply migration");
+
+    assert!(
+        Database::table_exists(&conn, "workbench_workspaces").expect("check table"),
+        "v12 must create the workbench workspace table"
+    );
+    assert_eq!(
+        Database::get_user_version(&conn).expect("version after migration"),
+        12
+    );
+}
+
+#[test]
+fn workbench_workspace_crud_preserves_versioned_document() {
+    let conn = Connection::open_in_memory().expect("open memory db");
+    Database::create_tables_on_conn(&conn).expect("create tables");
+    let db = Database {
+        conn: std::sync::Mutex::new(conn),
+    };
+    let document = json!({
+        "schemaVersion": 1,
+        "layout": "side-by-side",
+        "panels": [{
+            "id": "panel-1",
+            "agent": "codex",
+            "authMode": "subscription",
+            "cwd": "/tmp/project",
+            "view": "preview",
+            "previewUrl": "http://localhost:3000",
+            "order": 0
+        }]
+    });
+
+    let saved = db
+        .save_workbench_workspace("workspace-1", "Website redesign", &document, true)
+        .expect("save workspace");
+    assert_eq!(saved.name, "Website redesign");
+    assert_eq!(saved.document, document);
+
+    let listed = db.list_workbench_workspaces().expect("list workspaces");
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].id, "workspace-1");
+
+    let updated_document = json!({
+        "schemaVersion": 1,
+        "layout": "grid-2x2",
+        "panels": []
+    });
+    let updated = db
+        .save_workbench_workspace(
+            "workspace-1",
+            "Website redesign v2",
+            &updated_document,
+            false,
+        )
+        .expect("update workspace");
+    assert_eq!(updated.created_at, saved.created_at);
+    assert_eq!(updated.name, "Website redesign v2");
+    assert_eq!(updated.document, updated_document);
+
+    db.delete_workbench_workspace("workspace-1")
+        .expect("delete workspace");
+    assert!(db
+        .get_workbench_workspace("workspace-1")
+        .expect("get deleted workspace")
+        .is_none());
+}
+
+#[test]
+fn workbench_workspace_rejects_invalid_metadata() {
+    let conn = Connection::open_in_memory().expect("open memory db");
+    Database::create_tables_on_conn(&conn).expect("create tables");
+    let db = Database {
+        conn: std::sync::Mutex::new(conn),
+    };
+
+    assert!(db
+        .save_workbench_workspace("../escape", "Valid", &json!({}), false)
+        .is_err());
+    assert!(db
+        .save_workbench_workspace("valid-id", "  ", &json!({}), false)
+        .is_err());
+    assert!(db
+        .save_workbench_workspace("valid-id", "Valid", &json!([]), false)
+        .is_err());
+}
+
+#[test]
 fn schema_migration_adds_missing_columns_for_providers() {
     let conn = Connection::open_in_memory().expect("open memory db");
 

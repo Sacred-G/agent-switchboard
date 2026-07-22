@@ -33,6 +33,16 @@ export const terminalApi = {
     return await invoke("workbench_create_directory", { parent, folderName });
   },
 
+  /** Write HTML to a temp file and open it in the system browser. */
+  async openHtmlInBrowser(html: string): Promise<string> {
+    return await invoke("workbench_open_html_in_browser", { html });
+  },
+
+  /** Save HTML to a user-chosen path. */
+  async saveHtml(path: string, html: string): Promise<string> {
+    return await invoke("workbench_save_html", { path, html });
+  },
+
   async create(options: CreateTerminalOptions): Promise<boolean> {
     return await invoke("workbench_create_terminal", { ...options });
   },
