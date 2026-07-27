@@ -10,10 +10,21 @@ use std::path::{Component, Path, PathBuf};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
+use axum::{
+    extract::{Path as AxumPath, State as AxumState},
+    http::{
+        header::{CACHE_CONTROL, CONTENT_TYPE, X_CONTENT_TYPE_OPTIONS},
+        HeaderValue, StatusCode,
+    },
+    response::{IntoResponse, Response},
+    routing::get,
+    Router,
+};
 use base64::Engine as _;
 use portable_pty::{native_pty_system, ChildKiller, CommandBuilder, MasterPty, PtySize};
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
+use tokio::sync::{Mutex as AsyncMutex, RwLock};
 
 use crate::app_config::AppType;
 use crate::services::ProviderService;
@@ -25,6 +36,94 @@ use super::misc::{
 
 pub const TERMINAL_OUTPUT_EVENT: &str = "workbench-terminal-output";
 pub const TERMINAL_EXIT_EVENT: &str = "workbench-terminal-exit";
+const MAX_HTML_PREVIEW_BYTES: usize = 5 * 1024 * 1024;
+
+#[derive(Clone)]
+struct HtmlPreviewState {
+    token: String,
+    html: Arc<RwLock<String>>,
+}
+
+struct HtmlPreviewRuntime {
+    url: String,
+    html: Arc<RwLock<String>>,
+}
+
+#[derive(Default)]
+pub struct HtmlPreviewServer {
+    runtime: AsyncMutex<Option<HtmlPreviewRuntime>>,
+}
+
+async fn serve_html_preview(
+    AxumPath(token): AxumPath<String>,
+    AxumState(state): AxumState<HtmlPreviewState>,
+) -> Response {
+    if token != state.token {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+
+    let html = state.html.read().await.clone();
+    let mut response = html.into_response();
+    response.headers_mut().insert(
+        CONTENT_TYPE,
+        HeaderValue::from_static("text/html; charset=utf-8"),
+    );
+    response
+        .headers_mut()
+        .insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
+    response
+        .headers_mut()
+        .insert(X_CONTENT_TYPE_OPTIONS, HeaderValue::from_static("nosniff"));
+    response
+}
+
+#[tauri::command]
+pub async fn workbench_update_html_preview(
+    server: State<'_, HtmlPreviewServer>,
+    html: String,
+) -> Result<String, String> {
+    if html.len() > MAX_HTML_PREVIEW_BYTES {
+        return Err(format!(
+            "HTML preview exceeds the {} MiB limit",
+            MAX_HTML_PREVIEW_BYTES / 1024 / 1024
+        ));
+    }
+
+    let mut runtime = server.runtime.lock().await;
+    if let Some(runtime) = runtime.as_mut() {
+        *runtime.html.write().await = html;
+        return Ok(runtime.url.clone());
+    }
+
+    let listener = tokio::net::TcpListener::bind(("127.0.0.1", 0))
+        .await
+        .map_err(|e| format!("failed to start HTML preview server: {e}"))?;
+    let address = listener
+        .local_addr()
+        .map_err(|e| format!("failed to resolve HTML preview address: {e}"))?;
+    let token = uuid_like();
+    let html = Arc::new(RwLock::new(html));
+    let state = HtmlPreviewState {
+        token: token.clone(),
+        html: Arc::clone(&html),
+    };
+    let router = Router::new()
+        .route("/preview/:token", get(serve_html_preview))
+        .with_state(state);
+    let url = format!("http://127.0.0.1:{}/preview/{token}", address.port());
+
+    tokio::spawn(async move {
+        if let Err(error) = axum::serve(listener, router).await {
+            log::error!("HTML preview server stopped: {error}");
+        }
+    });
+
+    *runtime = Some(HtmlPreviewRuntime {
+        url: url.clone(),
+        html,
+    });
+    Ok(url)
+}
 
 fn validate_workspace_folder_name(folder_name: &str) -> Result<&str, String> {
     let trimmed = folder_name.trim();
@@ -107,8 +206,7 @@ pub async fn workbench_save_html(path: String, html: String) -> Result<String, S
             return Err("the destination folder does not exist".to_string());
         }
     }
-    std::fs::write(&target, html.as_bytes())
-        .map_err(|e| format!("failed to save file: {e}"))?;
+    std::fs::write(&target, html.as_bytes()).map_err(|e| format!("failed to save file: {e}"))?;
     Ok(target.to_string_lossy().into_owned())
 }
 

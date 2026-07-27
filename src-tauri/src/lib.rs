@@ -298,6 +298,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_audio_recorder::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(
@@ -889,6 +890,7 @@ pub fn run() {
             app.manage(commands::skill::SkillServiceState(Arc::new(skill_service)));
 
             app.manage(commands::terminal::TerminalRegistry::default());
+            app.manage(commands::terminal::HtmlPreviewServer::default());
 
             {
                 use crate::proxy::providers::copilot_auth::CopilotAuthManager;
@@ -1403,11 +1405,16 @@ pub fn run() {
             commands::workbench_create_terminal,
             commands::workbench_create_directory,
             commands::workbench_open_html_in_browser,
+            commands::workbench_update_html_preview,
             commands::workbench_save_html,
             commands::workbench_write_terminal,
             commands::workbench_resize_terminal,
             commands::workbench_close_terminal,
             commands::workbench_list_terminals,
+            commands::voice_input_is_supported,
+            commands::voice_input_start,
+            commands::voice_input_stop,
+            commands::voice_input_cancel,
             commands::list_workbench_workspaces,
             commands::get_workbench_workspace,
             commands::save_workbench_workspace,

@@ -97,6 +97,8 @@ interface ClaudeFormFieldsProps {
   onCodexAccountSelect?: (accountId: string | null) => void;
   codexFastMode?: boolean;
   onCodexFastModeChange?: (enabled: boolean) => void;
+  customModelLabels: boolean;
+  onCustomModelLabelsChange: (enabled: boolean) => void;
 
   // Template Values
   templateValueEntries: Array<[string, TemplateValueConfig]>;
@@ -173,6 +175,8 @@ export function ClaudeFormFields({
   onCodexAccountSelect,
   codexFastMode,
   onCodexFastModeChange,
+  customModelLabels,
+  onCustomModelLabelsChange,
   templateValueEntries,
   templateValues,
   templatePresetName,
@@ -221,6 +225,7 @@ export function ClaudeFormFields({
     defaultSonnetModel ||
     defaultOpusModel ||
     defaultFableModel ||
+    customModelLabels ||
     apiFormat !== "anthropic" ||
     apiKeyField !== "ANTHROPIC_AUTH_TOKEN" ||
     customUserAgent ||
@@ -863,6 +868,27 @@ export function ClaudeFormFields({
               <p className="text-xs text-muted-foreground">
                 {t("providerForm.modelMappingHint")}
               </p>
+              <label className="flex items-start gap-2 rounded-md border border-border-default bg-muted/30 p-3">
+                <Checkbox
+                  checked={customModelLabels}
+                  onCheckedChange={(checked) =>
+                    onCustomModelLabelsChange(checked === true)
+                  }
+                />
+                <span className="space-y-1">
+                  <span className="block text-sm font-medium">
+                    {t("providerForm.customModelLabelsLabel", {
+                      defaultValue: "Show custom model names in Claude Code",
+                    })}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    {t("providerForm.customModelLabelsHint", {
+                      defaultValue:
+                        "Use each role's display name as Claude Code's visible model alias while routing it to the configured upstream model.",
+                    })}
+                  </span>
+                </span>
+              </label>
             </div>
 
             <div className="space-y-3">

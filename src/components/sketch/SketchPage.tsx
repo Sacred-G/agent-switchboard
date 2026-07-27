@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { save as saveFileDialog } from "@tauri-apps/plugin-dialog";
 import { ExternalLink, RotateCw, Save } from "lucide-react";
@@ -18,20 +18,47 @@ export function SketchPage() {
   const darkMode = useDarkMode();
   const [splitTab, setSplitTab] = useState<SplitTab>("html");
   const [autoRun, setAutoRun] = useState(true);
-  const [previewNonce, setPreviewNonce] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewError, setPreviewError] = useState("");
+  const previewRequestRef = useRef(0);
 
   const composed = useMemo(() => composeHtml(sketch), [sketch]);
 
-  // srcDoc used by the preview iframe. When auto-run is on it tracks the
-  // composed document live; otherwise it only updates on manual "Run".
-  const [previewDoc, setPreviewDoc] = useState(composed);
+  const updatePreview = useCallback(
+    async (html: string, notifyOnError = false) => {
+      const requestId = ++previewRequestRef.current;
+      try {
+        const url = await terminalApi.updateHtmlPreview(html);
+        if (requestId !== previewRequestRef.current) return;
+        setPreviewError("");
+        setPreviewUrl(`${url}?revision=${requestId}`);
+      } catch (error) {
+        if (requestId !== previewRequestRef.current) return;
+        const message = extractErrorMessage(error);
+        setPreviewError(message);
+        if (notifyOnError) {
+          toast.error(t("sketch.runFailed"), {
+            description: message || undefined,
+          });
+        }
+      }
+    },
+    [t],
+  );
+
+  // Debounce live updates so typing does not reload the iframe on every
+  // keystroke. The document is served from a separate loopback origin because
+  // srcdoc inherits the app CSP and cannot execute pasted inline scripts.
   useEffect(() => {
-    if (autoRun) setPreviewDoc(composed);
-  }, [autoRun, composed]);
+    if (!autoRun) return;
+    const timeout = window.setTimeout(() => {
+      void updatePreview(composed);
+    }, 200);
+    return () => window.clearTimeout(timeout);
+  }, [autoRun, composed, updatePreview]);
 
   const runPreview = () => {
-    setPreviewDoc(composed);
-    setPreviewNonce((n) => n + 1);
+    void updatePreview(composed, true);
   };
 
   const openInBrowser = async () => {
@@ -189,14 +216,20 @@ export function SketchPage() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-white">
-          <iframe
-            key={previewNonce}
-            title={t("sketch.previewTitle")}
-            srcDoc={previewDoc}
-            className="h-full w-full border-0"
-            sandbox="allow-scripts allow-modals allow-forms allow-popups"
-          />
+        <div className="relative flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-white">
+          {previewUrl ? (
+            <iframe
+              key={previewUrl}
+              title={t("sketch.previewTitle")}
+              src={previewUrl}
+              className="h-full w-full border-0"
+              sandbox="allow-scripts allow-modals allow-forms allow-popups"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-muted-foreground">
+              {previewError || t("sketch.previewLoading")}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1099,7 +1099,9 @@
     "haikuModelPlaceholder": "",
     "modelHelper": "Optional: Specify default Claude model to use, leave blank to use system default.",
     "modelMappingLabel": "Model Mapping",
-    "modelMappingHint": "Display names only affect the /model menu; 1M is only a Claude Code context-capability declaration.",
+    "modelMappingHint": "Map Claude Code roles to upstream models. Enable custom model names to also use display names in Claude Code; 1M is only a context-capability declaration.",
+    "customModelLabelsLabel": "Show custom model names in Claude Code",
+    "customModelLabelsHint": "Use each role's display name as Claude Code's visible model alias while routing it to the configured upstream model.",
     "modelRoleLabel": "Model role",
     "modelRoleSonnet": "Sonnet",
     "modelRoleOpus": "Opus",
@@ -3031,12 +3033,17 @@
     "startVoiceInput": "Start voice input",
     "stopVoiceInput": "Stop voice input",
     "listening": "Listening…",
+    "transcribing": "Transcribing…",
     "voiceInputFailed": "Voice input failed",
     "voiceInputUnsupported": "Voice input is not supported by this system's webview.",
     "voiceErrors": {
       "not-allowed": "Microphone or speech-recognition permission was denied.",
       "audio-capture": "No working microphone was found.",
       "network": "The speech-recognition service could not be reached.",
+      "recognition-unavailable": "Apple Speech recognition is currently unavailable.",
+      "recognition-failed": "The recording could not be transcribed.",
+      "already-recording": "Another workspace panel is already recording.",
+      "no-speech": "No speech was recognized.",
       "start-failed": "Speech recognition could not be started."
     },
     "removeSession": "Remove session",
@@ -3093,12 +3100,14 @@
     "modeSplit": "HTML / CSS / JS",
     "autoRun": "Auto-run",
     "run": "Run",
+    "runFailed": "Failed to run HTML preview",
     "save": "Save as .html",
     "saved": "Saved to {{path}}",
     "saveFailed": "Failed to save file",
     "openInBrowser": "Open in browser",
     "openFailed": "Failed to open in browser",
     "previewTitle": "Sketch preview",
+    "previewLoading": "Starting isolated HTML preview…",
     "pastePlaceholder": "Paste or write a full HTML document here…"
   }
 }

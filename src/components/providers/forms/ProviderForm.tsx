@@ -535,6 +535,10 @@ function ProviderFormFull({
   const [codexFastMode, setCodexFastMode] = useState<boolean>(
     () => initialData?.meta?.codexFastMode ?? false,
   );
+  const [claudeCustomModelLabels, setClaudeCustomModelLabels] =
+    useState<boolean>(
+      () => initialData?.meta?.claudeCustomModelLabels ?? false,
+    );
   const [codexChatReasoning, setCodexChatReasoning] =
     useState<CodexChatReasoning>(
       () => initialData?.meta?.codexChatReasoning ?? {},
@@ -1449,6 +1453,10 @@ function ProviderFormFull({
           ? selectedGitHubAccountId
           : undefined,
       codexFastMode: isCodexOauthProvider ? codexFastMode : undefined,
+      claudeCustomModelLabels:
+        appId === "claude" && category !== "official"
+          ? claudeCustomModelLabels || undefined
+          : undefined,
       codexChatReasoning:
         appId === "codex" &&
         category !== "official" &&
@@ -2053,6 +2061,8 @@ function ProviderFormFull({
               onCodexAccountSelect={setSelectedCodexAccountId}
               codexFastMode={codexFastMode}
               onCodexFastModeChange={setCodexFastMode}
+              customModelLabels={claudeCustomModelLabels}
+              onCustomModelLabelsChange={setClaudeCustomModelLabels}
               templateValueEntries={templateValueEntries}
               templateValues={templateValues}
               templatePresetName={templatePreset?.name || ""}

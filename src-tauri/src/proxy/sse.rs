@@ -149,14 +149,14 @@ mod tests {
     fn complete_multibyte_in_single_chunk() {
         let mut buf = String::new();
         let mut rem = Vec::new();
-        append_utf8_safe(&mut buf, &mut rem, "".as_bytes());
-        assert_eq!(buf, "");
+        append_utf8_safe(&mut buf, &mut rem, "你".as_bytes());
+        assert_eq!(buf, "你");
         assert!(rem.is_empty());
     }
 
     #[test]
     fn split_multibyte_across_two_chunks() {
-        let bytes = "".as_bytes();
+        let bytes = "你".as_bytes();
         assert_eq!(bytes.len(), 3);
 
         let mut buf = String::new();
@@ -169,7 +169,7 @@ mod tests {
 
         // Chunk 2: last byte completes the character
         append_utf8_safe(&mut buf, &mut rem, &bytes[2..]);
-        assert_eq!(buf, "");
+        assert_eq!(buf, "你");
         assert!(rem.is_empty());
     }
 
@@ -202,7 +202,7 @@ mod tests {
 
     #[test]
     fn mixed_ascii_and_split_multibyte() {
-        let all = "hi".as_bytes();
+        let all = "hi你".as_bytes();
         assert_eq!(all.len(), 5);
 
         let mut buf = String::new();
@@ -213,13 +213,13 @@ mod tests {
         assert_eq!(rem.len(), 1);
 
         append_utf8_safe(&mut buf, &mut rem, &all[3..]);
-        assert_eq!(buf, "hi");
+        assert_eq!(buf, "hi你");
         assert!(rem.is_empty());
     }
 
     #[test]
     fn multiple_split_characters_in_sequence() {
-        let text = "";
+        let text = "你好";
         let bytes = text.as_bytes(); // E4 BD A0 E5 A5 BD
 
         let mut buf = String::new();
@@ -227,12 +227,12 @@ mod tests {
 
         // Split in the middle: first char complete + 1 byte of second
         append_utf8_safe(&mut buf, &mut rem, &bytes[..4]);
-        assert_eq!(buf, "");
+        assert_eq!(buf, "你");
         assert_eq!(rem.len(), 1);
 
         // Remaining 2 bytes complete second char
         append_utf8_safe(&mut buf, &mut rem, &bytes[4..]);
-        assert_eq!(buf, "");
+        assert_eq!(buf, "你好");
         assert!(rem.is_empty());
     }
 
@@ -255,10 +255,10 @@ mod tests {
     #[test]
     fn sse_json_with_chinese_split_at_boundary() {
         // Simulates an SSE data line with Chinese content split across chunks
-        let json_line = "data: {\"text\":\"\"}\n\n";
+        let json_line = "data: {\"text\":\"你好\"}\n\n";
         let bytes = json_line.as_bytes();
 
-        let ni_start = bytes.windows(3).position(|w| w == "".as_bytes()).unwrap();
+        let ni_start = bytes.windows(3).position(|w| w == "你".as_bytes()).unwrap();
         let split_point = ni_start + 1;
 
         let mut buf = String::new();
@@ -273,7 +273,7 @@ mod tests {
         // Verify the buffer can be parsed as SSE with valid JSON
         let data = strip_sse_field(buf.lines().next().unwrap(), "data").unwrap();
         let parsed: serde_json::Value = serde_json::from_str(data).unwrap();
-        assert_eq!(parsed["text"], "");
+        assert_eq!(parsed["text"], "你好");
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
         let mut buf = String::new();
         let mut rem = Vec::new();
 
-        append_utf8_safe(&mut buf, &mut rem, &"".as_bytes()[..1]);
+        append_utf8_safe(&mut buf, &mut rem, &"你".as_bytes()[..1]);
         assert_eq!(rem.len(), 1);
 
         // Next chunk starts with an invalid byte – the stale remainder and the

@@ -64,7 +64,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5RUZDNDZDNEVBNUJGMTIKUldRU3Y2Vk9iTVR2ZVFUcWlVdVV4RU00YnZvcUFobUdlaWVwVFZQVUF4c1U2d3RlQjl1bWZWYkMK",
       "endpoints": [
-        "https://github.com/sacred-g/agent-switchboard/releases/latest/download/latest.json"
+        "https://github.com/Sacred-G/agent-switchboard/releases/latest/download/latest.json"
       ]
     }
   }

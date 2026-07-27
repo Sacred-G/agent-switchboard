@@ -38,6 +38,11 @@ export const terminalApi = {
     return await invoke("workbench_open_html_in_browser", { html });
   },
 
+  /** Update the isolated in-app HTML preview and return its loopback URL. */
+  async updateHtmlPreview(html: string): Promise<string> {
+    return await invoke("workbench_update_html_preview", { html });
+  },
+
   /** Save HTML to a user-chosen path. */
   async saveHtml(path: string, html: string): Promise<string> {
     return await invoke("workbench_save_html", { path, html });

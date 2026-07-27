@@ -2618,7 +2618,7 @@ mod tests {
         assert!(message.contains("Provider PackyCode-response Request failed"));
         assert!(message.contains(" HTTP 429"));
         assert!(message.contains("rate limit exceeded"));
-        assert!(!message.contains(""));
+        assert!(!message.contains("(1/1)"));
     }
 
     #[test]

@@ -62,6 +62,8 @@ const renderCopilotForm = (overrides: Partial<ClaudeFormFieldsProps> = {}) => {
     onCodexAccountSelect: vi.fn(),
     codexFastMode: false,
     onCodexFastModeChange: vi.fn(),
+    customModelLabels: false,
+    onCustomModelLabelsChange: vi.fn(),
     templateValueEntries: [],
     templateValues: {},
     templatePresetName: "",

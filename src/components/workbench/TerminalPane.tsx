@@ -316,7 +316,9 @@ export function TerminalPane({
           <button
             type="button"
             onClick={voice.isListening ? voice.stop : voice.start}
-            disabled={!voice.isSupported}
+            disabled={
+              !voice.isSupported || voice.isStarting || voice.isTranscribing
+            }
             title={
               voice.isSupported
                 ? t(
@@ -330,7 +332,10 @@ export function TerminalPane({
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-100",
               voice.isListening && "bg-red-500/15 text-red-400 animate-pulse",
-              !voice.isSupported && "cursor-not-allowed opacity-40",
+              (!voice.isSupported ||
+                voice.isStarting ||
+                voice.isTranscribing) &&
+                "cursor-not-allowed opacity-40",
             )}
           >
             {voice.isListening ? (
@@ -578,6 +583,12 @@ export function TerminalPane({
           <div className="absolute bottom-2 left-2 right-2 rounded-md border border-red-500/30 bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg">
             <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-red-500" />
             {voice.preview || t("workbench.listening")}
+          </div>
+        )}
+        {voice.isTranscribing && (
+          <div className="absolute bottom-2 left-2 right-2 rounded-md border border-blue-500/30 bg-background/95 px-3 py-2 text-xs text-foreground shadow-lg">
+            <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-blue-400" />
+            {t("workbench.transcribing")}
           </div>
         )}
         {historyOpen && (
