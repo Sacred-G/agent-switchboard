@@ -65,6 +65,7 @@ jobs:
             file \
             patchelf \
             libssl-dev \
+            libasound2-dev \
             rpm \
             flatpak \
             flatpak-builder \
