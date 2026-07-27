@@ -5,6 +5,19 @@ All notable changes to Agent Switchboard will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.18.0](https://github.com/Sacred-G/agent-switchboard/compare/v3.17.1...v3.18.0) (2026-07-27)
+
+
+### Features
+
+* complete switchboard fixes and automate releases ([70607f8](https://github.com/Sacred-G/agent-switchboard/commit/70607f8253cd37e699877a6d2eb8adb232dec014))
+
+
+### Bug Fixes
+
+* install Linux audio build dependency ([a5da5fb](https://github.com/Sacred-G/agent-switchboard/commit/a5da5fbf5279c908777a30a995fdeda0b4950238))
+* synchronize Rust release versions ([#10](https://github.com/Sacred-G/agent-switchboard/issues/10)) ([0e64c71](https://github.com/Sacred-G/agent-switchboard/commit/0e64c71cbe333ca42edf3d908c691fb237799032))
+
 ## [3.16.3] - 2026-06-14
 
 Development since v3.16.2 focuses on getting usage accounting right end-to-end — billing route-takeover and format-conversion traffic by the real upstream model and pricing basis (schema v11), counting Claude Code Workflow sub-agent sessions, folding Claude Desktop into the Claude view, refreshing the model pricing seed, and reworking the usage dashboard with global provider/model filters, brand-icon toolbars, and far more resilient quota queries — while hardening the proxy (mislabeled SSE bodies, Codex image rectification, OAuth token and takeover-residue recovery, Hermes duplicate YAML keys), reworking provider configuration (a custom User-Agent override, a unified Codex advanced section, searchable preset selection, a Fable 5 tier, and refreshed Kimi/Unity2/Volcengine/MiniMax presets), and smoothing the update, About-panel, and provider-health experiences.
