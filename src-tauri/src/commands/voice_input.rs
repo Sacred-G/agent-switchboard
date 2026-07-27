@@ -14,6 +14,7 @@ use objc2_speech::{
 #[cfg(target_os = "macos")]
 use tauri_plugin_audio_recorder::{AudioFormat, AudioQuality, AudioRecorderExt, RecordingConfig};
 
+#[cfg(target_os = "macos")]
 const MAX_RECORDING_SECONDS: u32 = 120;
 
 #[tauri::command]
