@@ -1137,13 +1137,13 @@ mod tests {
             "event: response.created\n",
             "data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_cn\",\"model\":\"gpt-4o\",\"usage\":{\"input_tokens\":5,\"output_tokens\":0}}}\n\n",
             "event: response.output_text.delta\n",
-            "data: {\"type\":\"response.output_text.delta\",\"delta\":\"\"}\n\n",
+            "data: {\"type\":\"response.output_text.delta\",\"delta\":\"你好\"}\n\n",
             "event: response.completed\n",
             "data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\",\"usage\":{\"input_tokens\":5,\"output_tokens\":4}}}\n\n"
         );
         let bytes = full.as_bytes();
 
-        let ni_start = bytes.windows(3).position(|w| w == "".as_bytes()).unwrap();
+        let ni_start = bytes.windows(3).position(|w| w == "你".as_bytes()).unwrap();
         let split_point = ni_start + 2;
 
         let chunk1 = Bytes::from(bytes[..split_point].to_vec());
@@ -1161,8 +1161,8 @@ mod tests {
             .collect::<String>();
 
         assert!(
-            merged.contains(""),
-            "expected '' in output, got replacement chars (U+FFFD)"
+            merged.contains("你好"),
+            "expected '你好' in output, got replacement chars (U+FFFD)"
         );
         assert!(
             !merged.contains('\u{FFFD}'),

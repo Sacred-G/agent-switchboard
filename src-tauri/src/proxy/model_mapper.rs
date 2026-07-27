@@ -6,9 +6,13 @@ use serde_json::Value;
 
 pub struct ModelMapping {
     pub haiku_model: Option<String>,
+    pub haiku_name: Option<String>,
     pub sonnet_model: Option<String>,
+    pub sonnet_name: Option<String>,
     pub opus_model: Option<String>,
+    pub opus_name: Option<String>,
     pub fable_model: Option<String>,
+    pub fable_name: Option<String>,
     pub default_model: Option<String>,
 }
 
@@ -22,8 +26,18 @@ impl ModelMapping {
                 .and_then(|v| v.as_str())
                 .filter(|s| !s.is_empty())
                 .map(String::from),
+            haiku_name: env
+                .and_then(|e| e.get("ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(String::from),
             sonnet_model: env
                 .and_then(|e| e.get("ANTHROPIC_DEFAULT_SONNET_MODEL"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(String::from),
+            sonnet_name: env
+                .and_then(|e| e.get("ANTHROPIC_DEFAULT_SONNET_MODEL_NAME"))
                 .and_then(|v| v.as_str())
                 .filter(|s| !s.is_empty())
                 .map(String::from),
@@ -32,8 +46,18 @@ impl ModelMapping {
                 .and_then(|v| v.as_str())
                 .filter(|s| !s.is_empty())
                 .map(String::from),
+            opus_name: env
+                .and_then(|e| e.get("ANTHROPIC_DEFAULT_OPUS_MODEL_NAME"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(String::from),
             fable_model: env
                 .and_then(|e| e.get("ANTHROPIC_DEFAULT_FABLE_MODEL"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(String::from),
+            fable_name: env
+                .and_then(|e| e.get("ANTHROPIC_DEFAULT_FABLE_MODEL_NAME"))
                 .and_then(|v| v.as_str())
                 .filter(|s| !s.is_empty())
                 .map(String::from),
@@ -55,6 +79,22 @@ impl ModelMapping {
 
     pub fn map_model(&self, original_model: &str) -> String {
         let model_lower = original_model.to_lowercase();
+
+        for (name, model) in [
+            (&self.sonnet_name, &self.sonnet_model),
+            (&self.opus_name, &self.opus_model),
+            (&self.fable_name, &self.fable_model),
+            (&self.haiku_name, &self.haiku_model),
+        ] {
+            if name
+                .as_deref()
+                .is_some_and(|name| model_alias_eq(original_model, name))
+            {
+                if let Some(model) = model {
+                    return model.clone();
+                }
+            }
+        }
 
         if model_lower.contains("fable") {
             if let Some(ref m) = self.fable_model {
@@ -86,6 +126,12 @@ impl ModelMapping {
 
         original_model.to_string()
     }
+}
+
+fn model_alias_eq(left: &str, right: &str) -> bool {
+    strip_one_m_suffix_for_upstream(left)
+        .trim()
+        .eq_ignore_ascii_case(strip_one_m_suffix_for_upstream(right).trim())
 }
 
 ///
@@ -194,6 +240,20 @@ mod tests {
         let (result, original, mapped) = apply_model_mapping(body, &provider);
         assert_eq!(result["model"], "sonnet-mapped");
         assert_eq!(original, Some("claude-sonnet-4-5-20250929".to_string()));
+        assert_eq!(mapped, Some("sonnet-mapped".to_string()));
+    }
+
+    #[test]
+    fn test_custom_display_name_maps_to_sonnet_upstream() {
+        let mut provider = create_provider_with_mapping();
+        provider.settings_config["env"]["ANTHROPIC_DEFAULT_SONNET_MODEL_NAME"] =
+            json!("Grok Latest");
+
+        let body = json!({"model": "Grok Latest[1M]"});
+        let (result, original, mapped) = apply_model_mapping(body, &provider);
+
+        assert_eq!(result["model"], "sonnet-mapped");
+        assert_eq!(original, Some("Grok Latest[1M]".to_string()));
         assert_eq!(mapped, Some("sonnet-mapped".to_string()));
     }
 

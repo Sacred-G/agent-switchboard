@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
-import { FolderOpen, RefreshCw } from "lucide-react";
+import { FolderOpen, Loader2, Play, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -21,7 +22,13 @@ import {
 } from "@/components/ui/select";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import { cn } from "@/lib/utils";
-import { providersApi, terminalApi, type AppId } from "@/lib/api";
+import {
+  providersApi,
+  terminalApi,
+  workbenchApi,
+  type AppId,
+  type WorkbenchProjectCommand,
+} from "@/lib/api";
 import { extractErrorMessage } from "@/utils/errorUtils";
 import type { Provider } from "@/types";
 import type {
@@ -107,6 +114,12 @@ export function AddSessionDialog({
   const [folderName, setFolderName] = useState(() =>
     generateWorkspaceName(AGENT_CHOICES[0].agent),
   );
+  const [isolateWithWorktree, setIsolateWithWorktree] = useState(false);
+  const [worktreeBranch, setWorktreeBranch] = useState("");
+  const [projectCommands, setProjectCommands] = useState<
+    WorkbenchProjectCommand[]
+  >([]);
+  const [detectingCommands, setDetectingCommands] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const supportsAuthModes = Boolean(choice.app);
@@ -148,6 +161,34 @@ export function AddSessionDialog({
     };
   }, [open, choice.app, effectiveAuthMode]);
 
+  useEffect(() => {
+    const directory = cwd.trim();
+    if (!open || workspaceMode !== "existing" || !directory) {
+      setProjectCommands([]);
+      setDetectingCommands(false);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setDetectingCommands(true);
+      void workbenchApi
+        .detectProjectCommands(directory)
+        .then((commands) => {
+          if (!cancelled) setProjectCommands(commands);
+        })
+        .catch(() => {
+          if (!cancelled) setProjectCommands([]);
+        })
+        .finally(() => {
+          if (!cancelled) setDetectingCommands(false);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [cwd, open, workspaceMode]);
+
   const selectedProvider = useMemo(
     () => providers.find((p) => p.id === providerId),
     [providers, providerId],
@@ -157,6 +198,8 @@ export function AddSessionDialog({
     !submitting &&
     (choice.agent !== "custom" || command.trim().length > 0) &&
     (effectiveAuthMode !== "api" || !choice.app || Boolean(providerId)) &&
+    (!isolateWithWorktree ||
+      (workspaceMode === "existing" && Boolean(cwd.trim()))) &&
     (workspaceMode === "existing" ||
       (Boolean(parentDirectory.trim()) && Boolean(folderName.trim())));
 
@@ -210,6 +253,8 @@ export function AddSessionDialog({
           effectiveAuthMode === "api" ? selectedProvider?.name : undefined,
         command: choice.agent === "custom" ? command.trim() : undefined,
         cwd: launchDirectory,
+        isolateWithWorktree,
+        worktreeBranch: worktreeBranch.trim() || undefined,
       });
       onOpenChange(false);
       setCommand("");
@@ -225,7 +270,7 @@ export function AddSessionDialog({
           <DialogTitle>{t("workbench.addSession")}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
           <div className="grid grid-cols-3 gap-2">
             {AGENT_CHOICES.map((item) => (
               <button
@@ -411,6 +456,80 @@ export function AddSessionDialog({
                 )}
               </div>
             )}
+            {workspaceMode === "existing" && (
+              <div className="space-y-2 rounded-lg border border-border/80 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="worktree-isolation">
+                      {t("workbench.worktreeIsolation")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("workbench.worktreeIsolationHint")}
+                    </p>
+                  </div>
+                  <Switch
+                    id="worktree-isolation"
+                    checked={isolateWithWorktree}
+                    onCheckedChange={setIsolateWithWorktree}
+                  />
+                </div>
+                {isolateWithWorktree && (
+                  <div className="space-y-1.5 border-t pt-2">
+                    <Label className="text-xs">
+                      {t("workbench.worktreeBranch")}
+                    </Label>
+                    <Input
+                      value={worktreeBranch}
+                      onChange={(event) =>
+                        setWorktreeBranch(event.target.value)
+                      }
+                      placeholder={t("workbench.worktreeBranchPlaceholder")}
+                      className="font-mono"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {workspaceMode === "existing" &&
+              (detectingCommands || projectCommands.length > 0) && (
+                <div className="space-y-2 rounded-lg border border-border/80 p-3">
+                  <div className="flex items-center gap-2">
+                    {detectingCommands ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5 text-emerald-500" />
+                    )}
+                    <Label className="text-xs">
+                      {t("workbench.detectedCommands")}
+                    </Label>
+                  </div>
+                  {projectCommands.length > 0 && (
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {projectCommands.map((item) => (
+                        <button
+                          key={item.command}
+                          type="button"
+                          onClick={() => {
+                            const custom = AGENT_CHOICES.find(
+                              (candidate) => candidate.agent === "custom",
+                            );
+                            if (custom) setChoice(custom);
+                            setCommand(item.command);
+                          }}
+                          className="flex min-w-0 items-center justify-between gap-2 rounded-md border bg-background px-2.5 py-2 text-left transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/5"
+                        >
+                          <span className="truncate text-xs font-medium">
+                            {item.name}
+                          </span>
+                          <code className="truncate text-[10px] text-muted-foreground">
+                            {item.command}
+                          </code>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

@@ -23,6 +23,7 @@ pub(crate) use dao::proxy::{
     validate_cost_multiplier, validate_pricing_source, PRICING_SOURCE_REQUEST,
     PRICING_SOURCE_RESPONSE,
 };
+pub use dao::workbench::WorkbenchWorkspaceRecord;
 pub use dao::FailoverQueueItem;
 
 use crate::config::get_app_config_dir;
@@ -31,7 +32,7 @@ use rusqlite::{hooks::Action, Connection};
 use serde::Serialize;
 use std::sync::Mutex;
 
-pub(crate) const SCHEMA_VERSION: i32 = 11;
+pub(crate) const SCHEMA_VERSION: i32 = 12;
 
 pub(crate) fn to_json_string<T: Serialize>(value: &T) -> Result<String, AppError> {
     serde_json::to_string(value)

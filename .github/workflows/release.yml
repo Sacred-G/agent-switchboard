@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -64,6 +65,7 @@ jobs:
             file \
             patchelf \
             libssl-dev \
+            libasound2-dev \
             rpm \
             flatpak \
             flatpak-builder \
@@ -640,7 +642,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Agent Switchboard ${{ github.ref_name }}
-          prerelease: true
+          prerelease: false
           body: |
             ## Agent Switchboard ${{ github.ref_name }}
 

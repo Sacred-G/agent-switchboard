@@ -32,7 +32,9 @@ pub mod terminal;
 mod lightweight;
 mod s3_sync;
 mod usage;
+mod voice_input;
 mod webdav_sync;
+mod workbench;
 mod workspace;
 
 pub use auth::*;
@@ -66,5 +68,7 @@ pub use terminal::*;
 pub use lightweight::*;
 pub use s3_sync::*;
 pub use usage::*;
+pub use voice_input::*;
 pub use webdav_sync::*;
+pub use workbench::*;
 pub use workspace::*;

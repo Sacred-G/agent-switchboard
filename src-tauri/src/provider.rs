@@ -410,6 +410,12 @@ pub struct ProviderMeta {
     /// Codex OAuth FAST mode: inject `service_tier = "priority"` for ChatGPT Codex requests.
     #[serde(rename = "codexFastMode", skip_serializing_if = "Option::is_none")]
     pub codex_fast_mode: Option<bool>,
+    /// Use role display names as Claude Code's client-facing model aliases.
+    #[serde(
+        rename = "claudeCustomModelLabels",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub claude_custom_model_labels: Option<bool>,
     /// Codex Responses -> Chat Completions reasoning capability metadata.
     #[serde(rename = "codexChatReasoning", skip_serializing_if = "Option::is_none")]
     pub codex_chat_reasoning: Option<CodexChatReasoningConfig>,

@@ -882,13 +882,13 @@ mod tests {
     async fn test_streaming_chinese_split_across_chunks_no_replacement_chars() {
         // Before the fix, from_utf8_lossy would produce U+FFFD for each half.
         let full = concat!(
-            "data: {\"id\":\"chatcmpl_3\",\"model\":\"gpt-4o\",\"choices\":[{\"delta\":{\"content\":\"\"}}]}\n\n",
+            "data: {\"id\":\"chatcmpl_3\",\"model\":\"gpt-4o\",\"choices\":[{\"delta\":{\"content\":\"你好\"}}]}\n\n",
             "data: {\"id\":\"chatcmpl_3\",\"model\":\"gpt-4o\",\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":2}}\n\n",
             "data: [DONE]\n\n"
         );
         let bytes = full.as_bytes();
 
-        let ni_start = bytes.windows(3).position(|w| w == "".as_bytes()).unwrap();
+        let ni_start = bytes.windows(3).position(|w| w == "你".as_bytes()).unwrap();
         let split_point = ni_start + 1;
 
         let chunk1 = Bytes::from(bytes[..split_point].to_vec());
@@ -908,8 +908,8 @@ mod tests {
 
         // Must contain the original Chinese characters, not replacement chars
         assert!(
-            merged.contains(""),
-            "expected '' in output, got replacement chars (U+FFFD)"
+            merged.contains("你好"),
+            "expected '你好' in output, got replacement chars (U+FFFD)"
         );
         assert!(
             !merged.contains('\u{FFFD}'),

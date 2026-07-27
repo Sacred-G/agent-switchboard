@@ -330,6 +330,32 @@ pub(crate) fn build_anthropic_usage_from_responses(usage: Option<&Value>) -> Val
 }
 
 ///
+fn push_responses_message(input: &mut Vec<Value>, role: &str, content: Vec<Value>) {
+    if role == "assistant" {
+        // OpenRouter's Responses API accepts assistant history as an
+        // EasyInputMessage with string content. An output_text array is an
+        // OutputMessageItem instead and requires id/type/status metadata that
+        // Anthropic conversation history does not provide.
+        let text = content
+            .iter()
+            .filter_map(|block| block.get("text").and_then(Value::as_str))
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        if !text.is_empty() {
+            input.push(json!({
+                "role": role,
+                "content": text
+            }));
+        }
+    } else {
+        input.push(json!({
+            "role": role,
+            "content": content
+        }));
+    }
+}
+
 fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyError> {
     let mut input = Vec::new();
 
@@ -339,15 +365,17 @@ fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyErro
 
         match content {
             Some(Value::String(text)) => {
-                let content_type = if role == "assistant" {
-                    "output_text"
+                if role == "assistant" {
+                    input.push(json!({
+                        "role": role,
+                        "content": text
+                    }));
                 } else {
-                    "input_text"
-                };
-                input.push(json!({
-                    "role": role,
-                    "content": [{ "type": content_type, "text": text }]
-                }));
+                    input.push(json!({
+                        "role": role,
+                        "content": [{ "type": "input_text", "text": text }]
+                    }));
+                }
             }
 
             Some(Value::Array(blocks)) => {
@@ -387,11 +415,11 @@ fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyErro
 
                         "tool_use" => {
                             if !message_content.is_empty() {
-                                input.push(json!({
-                                    "role": role,
-                                    "content": message_content.clone()
-                                }));
-                                message_content.clear();
+                                push_responses_message(
+                                    &mut input,
+                                    role,
+                                    std::mem::take(&mut message_content),
+                                );
                             }
 
                             let id = block.get("id").and_then(|i| i.as_str()).unwrap_or("");
@@ -408,11 +436,11 @@ fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyErro
 
                         "tool_result" => {
                             if !message_content.is_empty() {
-                                input.push(json!({
-                                    "role": role,
-                                    "content": message_content.clone()
-                                }));
-                                message_content.clear();
+                                push_responses_message(
+                                    &mut input,
+                                    role,
+                                    std::mem::take(&mut message_content),
+                                );
                             }
 
                             let call_id = block
@@ -439,10 +467,7 @@ fn convert_messages_to_input(messages: &[Value]) -> Result<Vec<Value>, ProxyErro
                 }
 
                 if !message_content.is_empty() {
-                    input.push(json!({
-                        "role": role,
-                        "content": message_content
-                    }));
+                    push_responses_message(&mut input, role, message_content);
                 }
             }
 
@@ -594,6 +619,23 @@ mod tests {
         assert_eq!(result["instructions"], "You are a helpful assistant.");
         // system should not appear in input
         assert_eq!(result["input"].as_array().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn test_anthropic_to_responses_uses_easy_input_for_assistant_history() {
+        let input = json!({
+            "model": "gpt-4o",
+            "max_tokens": 1024,
+            "messages": [
+                {"role": "assistant", "content": [{"type": "text", "text": "Previous answer"}]},
+                {"role": "user", "content": "Follow-up"}
+            ]
+        });
+
+        let result = anthropic_to_responses(input, None, false, false).unwrap();
+        assert_eq!(result["input"][0]["role"], "assistant");
+        assert_eq!(result["input"][0]["content"], "Previous answer");
+        assert_eq!(result["input"][1]["content"][0]["type"], "input_text");
     }
 
     #[test]
@@ -757,10 +799,9 @@ mod tests {
         // Should produce: assistant message (text) + function_call item
         assert_eq!(input_arr.len(), 2);
 
-        // First: assistant message with output_text
+        // First: assistant history as an OpenRouter-compatible EasyInputMessage
         assert_eq!(input_arr[0]["role"], "assistant");
-        assert_eq!(input_arr[0]["content"][0]["type"], "output_text");
-        assert_eq!(input_arr[0]["content"][0]["text"], "Let me check");
+        assert_eq!(input_arr[0]["content"], "Let me check");
 
         // Second: function_call item (lifted from message)
         assert_eq!(input_arr[1]["type"], "function_call");
@@ -810,8 +851,7 @@ mod tests {
 
         // thinking should be discarded, only text remains
         assert_eq!(input_arr.len(), 1);
-        assert_eq!(input_arr[0]["content"][0]["type"], "output_text");
-        assert_eq!(input_arr[0]["content"][0]["text"], "The answer is 42");
+        assert_eq!(input_arr[0]["content"], "The answer is 42");
     }
 
     #[test]

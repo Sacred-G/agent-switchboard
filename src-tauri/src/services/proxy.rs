@@ -36,6 +36,14 @@ const CLAUDE_TAKEOVER_SONNET_MODEL: &str = "claude-sonnet-4-6";
 const CLAUDE_TAKEOVER_OPUS_MODEL: &str = "claude-opus-4-8";
 const CLAUDE_ONE_M_MARKER_FOR_CLIENT: &str = "[1M]";
 
+#[derive(Debug, Clone, Copy)]
+struct ClaudeTakeoverRole {
+    model_key: &'static str,
+    name_key: &'static str,
+    takeover_model: &'static str,
+    supports_one_m: bool,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ClaudeTakeoverAuthPolicy {
     PreserveExistingOrAuthToken,
@@ -86,10 +94,18 @@ impl ProxyService {
         } else {
             ClaudeTakeoverAuthPolicy::PreserveExistingOrAuthToken
         };
+        let use_custom_model_labels = provider
+            .meta
+            .as_ref()
+            .and_then(|meta| meta.claude_custom_model_labels)
+            .unwrap_or(false);
         let takeover_model_fields = if provider.uses_managed_account_auth() {
-            Self::build_claude_takeover_model_fields(&provider.settings_config)
+            Self::build_claude_takeover_model_fields(
+                &provider.settings_config,
+                use_custom_model_labels,
+            )
         } else {
-            Self::build_claude_takeover_model_fields(config)
+            Self::build_claude_takeover_model_fields(config, use_custom_model_labels)
         };
 
         Self::apply_claude_takeover_fields_with_policy_and_models(
@@ -105,7 +121,7 @@ impl ProxyService {
         proxy_url: &str,
         auth_policy: ClaudeTakeoverAuthPolicy,
     ) {
-        let takeover_model_fields = Self::build_claude_takeover_model_fields(config);
+        let takeover_model_fields = Self::build_claude_takeover_model_fields(config, false);
 
         Self::apply_claude_takeover_fields_with_policy_and_models(
             config,
@@ -188,7 +204,10 @@ impl ProxyService {
         }
     }
 
-    fn build_claude_takeover_model_fields(config: &Value) -> Vec<(&'static str, String)> {
+    fn build_claude_takeover_model_fields(
+        config: &Value,
+        use_custom_model_labels: bool,
+    ) -> Vec<(&'static str, String)> {
         let Some(env) = config.get("env").and_then(Value::as_object) else {
             return Vec::new();
         };
@@ -206,60 +225,73 @@ impl ProxyService {
             .or(small_fast_model);
 
         let mut fields = Vec::with_capacity(6);
-        Self::push_claude_takeover_role_fields(
-            &mut fields,
-            env,
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME",
-            CLAUDE_TAKEOVER_HAIKU_MODEL,
-            false,
-            haiku_model,
-        );
-        Self::push_claude_takeover_role_fields(
-            &mut fields,
-            env,
-            "ANTHROPIC_DEFAULT_SONNET_MODEL",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME",
-            CLAUDE_TAKEOVER_SONNET_MODEL,
-            true,
-            sonnet_model,
-        );
-        Self::push_claude_takeover_role_fields(
-            &mut fields,
-            env,
-            "ANTHROPIC_DEFAULT_OPUS_MODEL",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME",
-            CLAUDE_TAKEOVER_OPUS_MODEL,
-            true,
-            opus_model,
-        );
+        let roles = [
+            (
+                ClaudeTakeoverRole {
+                    model_key: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+                    name_key: "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME",
+                    takeover_model: CLAUDE_TAKEOVER_HAIKU_MODEL,
+                    supports_one_m: false,
+                },
+                haiku_model,
+            ),
+            (
+                ClaudeTakeoverRole {
+                    model_key: "ANTHROPIC_DEFAULT_SONNET_MODEL",
+                    name_key: "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME",
+                    takeover_model: CLAUDE_TAKEOVER_SONNET_MODEL,
+                    supports_one_m: true,
+                },
+                sonnet_model,
+            ),
+            (
+                ClaudeTakeoverRole {
+                    model_key: "ANTHROPIC_DEFAULT_OPUS_MODEL",
+                    name_key: "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME",
+                    takeover_model: CLAUDE_TAKEOVER_OPUS_MODEL,
+                    supports_one_m: true,
+                },
+                opus_model,
+            ),
+        ];
+        for (role, upstream_model) in roles {
+            Self::push_claude_takeover_role_fields(
+                &mut fields,
+                env,
+                role,
+                upstream_model,
+                use_custom_model_labels,
+            );
+        }
         fields
     }
 
     fn push_claude_takeover_role_fields(
         fields: &mut Vec<(&'static str, String)>,
         env: &Map<String, Value>,
-        model_key: &'static str,
-        name_key: &'static str,
-        takeover_model: &'static str,
-        supports_one_m: bool,
+        role: ClaudeTakeoverRole,
         upstream_model: Option<&str>,
+        use_custom_model_labels: bool,
     ) {
         let Some(upstream_model) = upstream_model else {
             return;
         };
 
-        let mut client_model = takeover_model.to_string();
-        if supports_one_m && Self::has_claude_one_m_marker(upstream_model) {
-            client_model.push_str(CLAUDE_ONE_M_MARKER_FOR_CLIENT);
-        }
-        fields.push((model_key, client_model));
-
-        let display_name = Self::claude_env_string(env, name_key)
+        let display_name = Self::claude_env_string(env, role.name_key)
             .map(str::to_string)
             .unwrap_or_else(|| Self::strip_claude_one_m_marker(upstream_model));
+        let mut client_model = if use_custom_model_labels && !display_name.is_empty() {
+            Self::strip_claude_one_m_marker(&display_name)
+        } else {
+            role.takeover_model.to_string()
+        };
+        if role.supports_one_m && Self::has_claude_one_m_marker(upstream_model) {
+            client_model.push_str(CLAUDE_ONE_M_MARKER_FOR_CLIENT);
+        }
+        fields.push((role.model_key, client_model));
+
         if !display_name.is_empty() {
-            fields.push((name_key, display_name));
+            fields.push((role.name_key, display_name));
         }
     }
 
@@ -2626,6 +2658,53 @@ mod tests {
         assert!(
             env.get("ANTHROPIC_AUTH_TOKEN").is_none(),
             "managed OAuth providers should avoid Claude Auth Token login semantics"
+        );
+    }
+
+    #[test]
+    fn claude_takeover_can_expose_custom_role_labels() {
+        let mut provider = Provider::with_id(
+            "openrouter".to_string(),
+            "OpenRouter".to_string(),
+            json!({
+                "env": {
+                    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api/v1/responses",
+                    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "openai/gpt-5.3-codex",
+                    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME": "GPT-5.3 Codex",
+                    "ANTHROPIC_DEFAULT_SONNET_MODEL": "~x-ai/grok-latest[1M]",
+                    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "Grok Latest",
+                    "ANTHROPIC_DEFAULT_OPUS_MODEL": "openai/gpt-5.6-terra-pro[1M]",
+                    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "GPT-5.6 Terra Pro"
+                }
+            }),
+            None,
+        );
+        provider.meta = Some(ProviderMeta {
+            claude_custom_model_labels: Some(true),
+            ..Default::default()
+        });
+
+        let mut live_config = provider.settings_config.clone();
+        ProxyService::apply_claude_takeover_fields_for_provider(
+            &mut live_config,
+            "http://127.0.0.1:15721",
+            &provider,
+        );
+
+        let env = live_config
+            .get("env")
+            .and_then(Value::as_object)
+            .expect("live env");
+        assert_env_str(env, "ANTHROPIC_DEFAULT_HAIKU_MODEL", Some("GPT-5.3 Codex"));
+        assert_env_str(
+            env,
+            "ANTHROPIC_DEFAULT_SONNET_MODEL",
+            Some("Grok Latest[1M]"),
+        );
+        assert_env_str(
+            env,
+            "ANTHROPIC_DEFAULT_OPUS_MODEL",
+            Some("GPT-5.6 Terra Pro[1M]"),
         );
     }
 

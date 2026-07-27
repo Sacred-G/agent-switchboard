@@ -82,6 +82,8 @@ sha2 = "0.10"
 hmac = "0.12"
 json5 = "0.4"
 json-five = "0.3.1"
+tauri-plugin-notification = "2.3.3"
+tauri-plugin-audio-recorder = "0.1.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 tauri-plugin-single-instance = "2"
@@ -99,6 +101,10 @@ rquickjs = { version = "0.8", features = ["bindgen"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
 objc2-app-kit = { version = "0.2", features = ["NSColor"] }
+block2 = "0.6"
+objc2-new = { package = "objc2", version = "0.6" }
+objc2-foundation = { version = "0.3", features = ["NSError", "NSLocale", "NSString", "NSURL"] }
+objc2-speech = { version = "0.3", default-features = false, features = ["std", "block2", "SFSpeechRecognitionRequest", "SFSpeechRecognitionResult", "SFSpeechRecognitionTask", "SFSpeechRecognitionTaskHint", "SFSpeechRecognizer", "SFTranscription"] }
 
 # Optimize release binary size to help reduce AppImage footprint
 [profile.release]

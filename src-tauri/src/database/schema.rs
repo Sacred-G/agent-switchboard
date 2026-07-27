@@ -265,6 +265,8 @@ impl Database {
         )
         .map_err(|e| AppError::Database(e.to_string()))?;
 
+        Self::create_workbench_workspaces_table(conn)?;
+
         let _ = conn.execute(
             "ALTER TABLE proxy_config ADD COLUMN live_takeover_active INTEGER NOT NULL DEFAULT 0",
             [],
@@ -404,6 +406,13 @@ impl Database {
                         Self::migrate_v10_to_v11(conn)?;
                         Self::set_user_version(conn, 11)?;
                     }
+                    11 => {
+                        log::info!(
+                            "Migrate database from v11 to v12 (durable workbench workspaces)"
+                        );
+                        Self::migrate_v11_to_v12(conn)?;
+                        Self::set_user_version(conn, 12)?;
+                    }
                     _ => {
                         return Err(AppError::Database(format!(" {version} {SCHEMA_VERSION}")));
                     }
@@ -425,6 +434,32 @@ impl Database {
                 Err(e)
             }
         }
+    }
+
+    fn create_workbench_workspaces_table(conn: &Connection) -> Result<(), AppError> {
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS workbench_workspaces (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                document TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                last_opened_at INTEGER NOT NULL
+            )",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_workbench_workspaces_recent
+             ON workbench_workspaces(last_opened_at DESC, updated_at DESC)",
+            [],
+        )
+        .map_err(|e| AppError::Database(e.to_string()))?;
+        Ok(())
+    }
+
+    fn migrate_v11_to_v12(conn: &Connection) -> Result<(), AppError> {
+        Self::create_workbench_workspaces_table(conn)
     }
 
     fn migrate_v0_to_v1(conn: &Connection) -> Result<(), AppError> {
