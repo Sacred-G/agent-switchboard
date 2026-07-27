@@ -498,6 +498,9 @@ mod tests {
         .expect("write");
 
         let meta = parse_session(&path).unwrap();
-        assert_eq!(meta.title.as_deref(), Some(""));
+        assert_eq!(
+            meta.title.as_deref(),
+            Some("Help me check changes in the workspace")
+        );
     }
 }

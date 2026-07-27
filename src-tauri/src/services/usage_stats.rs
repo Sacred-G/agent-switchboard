@@ -3720,7 +3720,7 @@ mod tests {
 
     #[test]
     fn test_strip_model_date_suffix_is_utf8_safe() {
-        assert_eq!(strip_model_date_suffix("-2026-05-14").as_deref(), Some(""));
+        assert_eq!(strip_model_date_suffix("-2026-05-14"), None);
         assert_eq!(strip_model_date_suffix("abc🚀12345678"), None);
     }
 
