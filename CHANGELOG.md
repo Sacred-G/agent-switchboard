@@ -5,6 +5,14 @@ All notable changes to Agent Switchboard will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.18.1](https://github.com/Sacred-G/agent-switchboard/compare/v3.18.0...v3.18.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* dispatch release builds with repository context ([#12](https://github.com/Sacred-G/agent-switchboard/issues/12)) ([e74f6a0](https://github.com/Sacred-G/agent-switchboard/commit/e74f6a0051c05a039ce2ad9c16939ef4a7923c96))
+* gate macOS voice recording constant ([#14](https://github.com/Sacred-G/agent-switchboard/issues/14)) ([1601ced](https://github.com/Sacred-G/agent-switchboard/commit/1601ceda41b12fadf698bc81901178ce28b8454a))
+
 ## [3.18.0](https://github.com/Sacred-G/agent-switchboard/compare/v3.17.1...v3.18.0) (2026-07-27)
 
 
